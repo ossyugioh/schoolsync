@@ -405,8 +405,7 @@ window.addEventListener('DOMContentLoaded', () => {
   <div class="topbar">
     <h2 id="topbar-title">ภาพรวม</h2>
     <input class="search-box" type="text" placeholder="🔍 ค้นหา..." id="globalSearch" oninput="doSearch(this.value)">
-    <button class="btn btn-outline btn-sm" onclick="exportData()">💾 บันทึกข้อมูล</button>
-    <button class="btn btn-outline btn-sm" onclick="importData()">📂 โหลดข้อมูล</button>
+    <button class="btn btn-primary btn-sm" onclick="saveAllToSupabase()" id="btn-save-all">💾 บันทึกข้อมูล</button>
     <button class="btn btn-outline btn-sm" onclick="generatePrintableForCurrent()">🖨️ สร้างไฟล์ปริ้น</button>
     <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ พิมพ์</button>
   </div>
@@ -5100,6 +5099,62 @@ function ensureSampleAssignments() {
 }
 // loadData() and initApp() are now called by Supabase DOMContentLoaded handler above
 // saveData() is now a no-op (Supabase handles persistence)
+async function saveAllToSupabase() {
+  checkAdminPin(async () => {
+    const btn = document.getElementById('btn-save-all');
+    btn.textContent = '⏳ กำลังบันทึก...';
+    btn.disabled = true;
+    try {
+      // บันทึกครู
+      for (const t of DB.teachers) {
+        await supabase_client.from('teachers').upsert({ id: t.id, name: t.name, nickname: t.nickname });
+      }
+      // บันทึกวิชา
+      for (const s of DB.subjects) {
+        await supabase_client.from('subjects').upsert({ id: s.id, name: s.name, color: s.color||null });
+      }
+      // บันทึกห้อง
+      for (const r of DB.rooms) {
+        await supabase_client.from('rooms').upsert({ id: r.id, name: r.name });
+      }
+      // บันทึก slots ทั้งหมด — ลบเก่าแล้ว insert ใหม่
+      await supabase_client.from('slots').delete().neq('id', 0);
+      const slotRows = [];
+      for (const [tid, days] of Object.entries(DB.slots)) {
+        for (const [day, periods] of Object.entries(days)) {
+          for (const [period, slot] of Object.entries(periods)) {
+            if (slot && slot.subject) {
+              slotRows.push({
+                teacher_id: parseInt(tid),
+                day,
+                period: parseInt(period),
+                subject: slot.subject,
+                room: slot.room || ''
+              });
+            }
+          }
+        }
+      }
+      if (slotRows.length > 0) {
+        // insert เป็น batch ละ 100 แถว
+        for (let i = 0; i < slotRows.length; i += 100) {
+          await supabase_client.from('slots').insert(slotRows.slice(i, i + 100));
+        }
+      }
+      // โหลดข้อมูลใหม่เพื่อได้ _dbid ที่ถูกต้อง
+      await loadDataFromSupabase();
+      renderTimetable();
+      showToast('✅ บันทึกข้อมูลทั้งหมดสำเร็จ!');
+    } catch(e) {
+      console.error(e);
+      alert('❌ บันทึกไม่สำเร็จ: ' + e.message);
+    } finally {
+      btn.textContent = '💾 บันทึกข้อมูล';
+      btn.disabled = false;
+    }
+  });
+}
+
 function initApp() {
   loadTimeSettings();
   renderDashboard();
