@@ -2870,23 +2870,42 @@ const FULL_ASSIGNMENTS = [
   ];
 
 // Safe storage
-const Store=(()=>{let m=null,h=false;try{localStorage.setItem('_t','1');localStorage.removeItem('_t');h=true;}catch(e){}return{get(){if(h)try{return localStorage.getItem('school_timetable_db');}catch(e){}return m;},set(v){if(h)try{localStorage.setItem('school_timetable_db',v);}catch(e){}m=v;}};})();
+const Store=(()=>{let m=null,h=false;try{localStorage.setItem('_t','1');localStorage.removeItem('_t');h=true;}catch(e){}return{
+  get(k){if(h)try{return localStorage.getItem(k);}catch(e){}return m;},
+  set(k,v){if(h)try{localStorage.setItem(k,v);}catch(e){}m=v;},
+  remove(k){if(h)try{localStorage.removeItem(k);}catch(e){}},
+  has(k){if(h)try{return localStorage.getItem(k)!==null;}catch(e){}return false;}
+};})();
+
+// ===================== VERSION STAMP =====================
+// เปลี่ยนค่านี้ทุกครั้งที่อัปเดตข้อมูลใน JSON เพื่อบังคับล้าง localStorage เก่า
+const DATA_VERSION = '14';  // ← เปลี่ยนตามชื่อไฟล์ JSON หรือเพิ่มเลขเมื่อมีการอัปเดต
+
 function loadData(){
-  try {
-    const s = Store.get();
-    if (s) {
-      DB = JSON.parse(s);
+  const savedVersion = Store.get('school_timetable_version');
+  const savedData    = Store.get('school_timetable_db');
+
+  if (savedVersion !== DATA_VERSION || !savedData) {
+    // เวอร์ชันไม่ตรง หรือยังไม่มีข้อมูล → ใช้ข้อมูล baseline จาก JSON ที่ฝังไว้
+    console.log(`[Timetable] Data version mismatch (stored: ${savedVersion}, current: ${DATA_VERSION}) — loading baseline.`);
+    // DB ยังคงเป็นค่าเริ่มต้นที่กำหนดไว้ด้านบน (จาก JSON)
+    Store.set('school_timetable_version', DATA_VERSION);
+    saveData();
+  } else {
+    // เวอร์ชันตรง → โหลดจาก localStorage
+    try {
+      DB = JSON.parse(savedData);
       recalcNextId();
+    } catch(e) {
+      console.warn('[Timetable] Failed to parse localStorage, using baseline.');
     }
-  } catch(e) {}
-  // Always restore full assignments (overwrite any incomplete cached version)
-  DB.assignments = FULL_ASSIGNMENTS.map(a => ({...a}));
+  }
+
   if (!DB.activityPeriods || Object.keys(DB.activityPeriods).length === 0) {
     DB.activityPeriods = {'จันทร์':[7,8],'อังคาร':[7],'พุธ':[7],'พฤหัสบดี':[7],'ศุกร์':[7]};
   }
-  saveData();
 }
-function saveData(){try{Store.set(JSON.stringify(DB));}catch(e){}}
+function saveData(){try{Store.set('school_timetable_db',JSON.stringify(DB));Store.set('school_timetable_version',DATA_VERSION);}catch(e){}}
 function recalcNextId() {
   nextId.teacher = Math.max(...DB.teachers.map(t=>t.id), 12) + 1;
   nextId.subject = Math.max(...DB.subjects.map(s=>s.id), 16) + 1;
@@ -4005,7 +4024,7 @@ function saveLocal(){
 
 function clearLocalAndLoadBaseline(){
   if (!confirm('ยืนยัน: ล้าง localStorage และโหลด baseline ที่ฝังไว้ในหน้า? ข้อมูลปัจจุบันจะหาย')) return;
-  try{ localStorage.removeItem('school_timetable_db'); }catch(e){}
+  try{ Store.remove('school_timetable_db'); Store.remove('school_timetable_version'); }catch(e){}
   alert('ล้าง localStorage เรียบร้อย กำลังโหลด baseline...');
   location.reload();
 }
