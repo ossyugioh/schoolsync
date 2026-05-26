@@ -236,33 +236,7 @@ tr:hover td { background: #f8fafc; }
 </head>
 <body>
 
-<!-- ===================== SUPABASE CONFIG MODAL ===================== -->
-<div id="sb-setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:16px;padding:32px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-    <div style="text-align:center;margin-bottom:24px">
-      <div style="font-size:48px">🔌</div>
-      <h2 style="margin:8px 0 4px;color:#1a3a5c;font-family:Sarabun,sans-serif">เชื่อมต่อ Supabase</h2>
-      <p style="color:#64748b;font-size:14px;font-family:Sarabun,sans-serif">กรอกข้อมูลจาก Settings → API ใน Supabase</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div>
-        <label style="font-size:13px;font-weight:600;color:#374151;font-family:Sarabun,sans-serif">Project URL</label>
-        <input id="sb-url-input" type="text" placeholder="https://xxxx.supabase.co"
-          style="width:100%;margin-top:4px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:Sarabun,sans-serif;box-sizing:border-box">
-      </div>
-      <div>
-        <label style="font-size:13px;font-weight:600;color:#374151;font-family:Sarabun,sans-serif">Anon Public Key</label>
-        <input id="sb-key-input" type="text" placeholder="eyJhbGciOiJIUzI1NiIs..."
-          style="width:100%;margin-top:4px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:Sarabun,sans-serif;box-sizing:border-box">
-      </div>
-      <button onclick="saveSupabaseConfig()"
-        style="margin-top:8px;padding:12px;background:#1a3a5c;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;font-family:Sarabun,sans-serif;cursor:pointer">
-        เชื่อมต่อ →
-      </button>
-      <p id="sb-setup-error" style="color:#dc2626;font-size:13px;text-align:center;display:none;font-family:Sarabun,sans-serif"></p>
-    </div>
-  </div>
-</div>
+<!-- Supabase config ฝังตายตัวในโค้ด -->
 
 <!-- LOADING OVERLAY -->
 <div id="sb-loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.9);z-index:99998;align-items:center;justify-content:center;flex-direction:column;gap:16px">
@@ -273,29 +247,15 @@ tr:hover td { background: #f8fafc; }
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// ===================== SUPABASE =====================
+// ===================== SUPABASE CONFIG (ฝังตายตัว) =====================
+const SB_URL = 'https://rnglcunbpvwcpopiiboe.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJuZ2xjdW5icHZ3Y3BvcGlpYm9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NzI5NzMsImV4cCI6MjA5NTM0ODk3M30.Ee0kc-4D2bv4O9efoHFV7pMygr3nsRaepWQBt-NFrNQ';
 const ADMIN_PIN = '1234';
 let supabase_client = null;
 let isAdminMode = false;
 
-function getSBConfig() {
-  try { const c = localStorage.getItem('sb_config'); return c ? JSON.parse(c) : null; } catch(e) { return null; }
-}
-
-function saveSupabaseConfig() {
-  const url = document.getElementById('sb-url-input').value.trim();
-  const key = document.getElementById('sb-key-input').value.trim();
-  const err = document.getElementById('sb-setup-error');
-  if (!url || !key) { err.textContent='กรุณากรอกให้ครบ'; err.style.display='block'; return; }
-  if (!url.startsWith('https://')) { err.textContent='URL ต้องขึ้นต้นด้วย https://'; err.style.display='block'; return; }
-  localStorage.setItem('sb_config', JSON.stringify({url, key}));
-  err.style.display='none';
-  document.getElementById('sb-setup-overlay').style.display='none';
-  initSupabase(url, key);
-}
-
-async function initSupabase(url, key) {
-  supabase_client = supabase.createClient(url, key);
+async function initSupabase() {
+  supabase_client = supabase.createClient(SB_URL, SB_KEY);
   showLoadingOverlay(true);
   await loadDataFromSupabase();
   showLoadingOverlay(false);
@@ -307,10 +267,6 @@ function showLoadingOverlay(show) {
   el.style.display = show ? 'flex' : 'none';
 }
 
-function showSetupModal() {
-  document.getElementById('sb-setup-overlay').style.display = 'flex';
-}
-
 async function loadDataFromSupabase() {
   try {
     const [t, s, r, sl] = await Promise.all([
@@ -319,7 +275,7 @@ async function loadDataFromSupabase() {
       supabase_client.from('rooms').select('*').order('id'),
       supabase_client.from('slots').select('*')
     ]);
-    if (t.error || s.error || r.error || sl.error) throw new Error('โหลดข้อมูลไม่สำเร็จ');
+    if (t.error || s.error || r.error || sl.error) throw new Error('โหลดไม่สำเร็จ');
     DB.teachers = t.data || [];
     DB.subjects = s.data || [];
     DB.rooms = r.data || [];
@@ -334,9 +290,7 @@ async function loadDataFromSupabase() {
     console.log('[Supabase] โหลดสำเร็จ ครู:', DB.teachers.length);
   } catch(e) {
     console.error('[Supabase]', e);
-    alert('เชื่อมต่อ Supabase ไม่สำเร็จ กรุณาตรวจสอบ URL และ Key');
-    localStorage.removeItem('sb_config');
-    showSetupModal();
+    alert('❌ เชื่อมต่อฐานข้อมูลไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต');
   }
 }
 
@@ -388,15 +342,14 @@ async function sbClearTeacherSlots(tid) {
 
 function checkAdminPin(callback) {
   if (isAdminMode) { callback(); return; }
-  const pin = prompt('🔐 กรอก PIN แอดมิน:');
+  const pin = prompt('🔐 กรุณาใส่รหัสผ่านแอดมินเพื่อบันทึกข้อมูล:');
+  if (pin === null) return; // กด Cancel
   if (pin === ADMIN_PIN) { isAdminMode = true; showToast('✅ เข้าสู่โหมดแอดมิน'); callback(); }
-  else if (pin !== null) alert('PIN ไม่ถูกต้อง');
+  else { alert('❌ รหัสผ่านไม่ถูกต้อง'); }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  const cfg = getSBConfig();
-  if (cfg && cfg.url && cfg.key) { initSupabase(cfg.url, cfg.key); }
-  else { showSetupModal(); }
+  initSupabase();
 });
 </script>
 
