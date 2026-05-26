@@ -236,6 +236,171 @@ tr:hover td { background: #f8fafc; }
 </head>
 <body>
 
+<!-- ===================== SUPABASE CONFIG MODAL ===================== -->
+<div id="sb-setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:32px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:48px">🔌</div>
+      <h2 style="margin:8px 0 4px;color:#1a3a5c;font-family:Sarabun,sans-serif">เชื่อมต่อ Supabase</h2>
+      <p style="color:#64748b;font-size:14px;font-family:Sarabun,sans-serif">กรอกข้อมูลจาก Settings → API ใน Supabase</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:13px;font-weight:600;color:#374151;font-family:Sarabun,sans-serif">Project URL</label>
+        <input id="sb-url-input" type="text" placeholder="https://xxxx.supabase.co"
+          style="width:100%;margin-top:4px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:Sarabun,sans-serif;box-sizing:border-box">
+      </div>
+      <div>
+        <label style="font-size:13px;font-weight:600;color:#374151;font-family:Sarabun,sans-serif">Anon Public Key</label>
+        <input id="sb-key-input" type="text" placeholder="eyJhbGciOiJIUzI1NiIs..."
+          style="width:100%;margin-top:4px;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:Sarabun,sans-serif;box-sizing:border-box">
+      </div>
+      <button onclick="saveSupabaseConfig()"
+        style="margin-top:8px;padding:12px;background:#1a3a5c;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;font-family:Sarabun,sans-serif;cursor:pointer">
+        เชื่อมต่อ →
+      </button>
+      <p id="sb-setup-error" style="color:#dc2626;font-size:13px;text-align:center;display:none;font-family:Sarabun,sans-serif"></p>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div id="sb-loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,0.9);z-index:99998;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="font-size:48px">⏳</div>
+  <p style="font-size:18px;font-weight:600;color:#1a3a5c;font-family:Sarabun,sans-serif">กำลังโหลดข้อมูลจาก Supabase...</p>
+</div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ===================== SUPABASE =====================
+const ADMIN_PIN = '1234';
+let supabase_client = null;
+let isAdminMode = false;
+
+function getSBConfig() {
+  try { const c = localStorage.getItem('sb_config'); return c ? JSON.parse(c) : null; } catch(e) { return null; }
+}
+
+function saveSupabaseConfig() {
+  const url = document.getElementById('sb-url-input').value.trim();
+  const key = document.getElementById('sb-key-input').value.trim();
+  const err = document.getElementById('sb-setup-error');
+  if (!url || !key) { err.textContent='กรุณากรอกให้ครบ'; err.style.display='block'; return; }
+  if (!url.startsWith('https://')) { err.textContent='URL ต้องขึ้นต้นด้วย https://'; err.style.display='block'; return; }
+  localStorage.setItem('sb_config', JSON.stringify({url, key}));
+  err.style.display='none';
+  document.getElementById('sb-setup-overlay').style.display='none';
+  initSupabase(url, key);
+}
+
+async function initSupabase(url, key) {
+  supabase_client = supabase.createClient(url, key);
+  showLoadingOverlay(true);
+  await loadDataFromSupabase();
+  showLoadingOverlay(false);
+  initApp();
+}
+
+function showLoadingOverlay(show) {
+  const el = document.getElementById('sb-loading-overlay');
+  el.style.display = show ? 'flex' : 'none';
+}
+
+function showSetupModal() {
+  document.getElementById('sb-setup-overlay').style.display = 'flex';
+}
+
+async function loadDataFromSupabase() {
+  try {
+    const [t, s, r, sl] = await Promise.all([
+      supabase_client.from('teachers').select('*').order('id'),
+      supabase_client.from('subjects').select('*').order('id'),
+      supabase_client.from('rooms').select('*').order('id'),
+      supabase_client.from('slots').select('*')
+    ]);
+    if (t.error || s.error || r.error || sl.error) throw new Error('โหลดข้อมูลไม่สำเร็จ');
+    DB.teachers = t.data || [];
+    DB.subjects = s.data || [];
+    DB.rooms = r.data || [];
+    DB.slots = {};
+    for (const row of (sl.data || [])) {
+      const tid = String(row.teacher_id);
+      if (!DB.slots[tid]) DB.slots[tid] = {};
+      if (!DB.slots[tid][row.day]) DB.slots[tid][row.day] = {};
+      DB.slots[tid][row.day][String(row.period)] = { subject: row.subject, room: row.room, _dbid: row.id };
+    }
+    recalcNextId();
+    console.log('[Supabase] โหลดสำเร็จ ครู:', DB.teachers.length);
+  } catch(e) {
+    console.error('[Supabase]', e);
+    alert('เชื่อมต่อ Supabase ไม่สำเร็จ กรุณาตรวจสอบ URL และ Key');
+    localStorage.removeItem('sb_config');
+    showSetupModal();
+  }
+}
+
+async function sbSaveTeacher(t) {
+  if (!supabase_client) return;
+  await supabase_client.from('teachers').upsert({ id: t.id, name: t.name, nickname: t.nickname });
+}
+async function sbDeleteTeacher(id) {
+  if (!supabase_client) return;
+  await supabase_client.from('slots').delete().eq('teacher_id', id);
+  await supabase_client.from('teachers').delete().eq('id', id);
+}
+async function sbSaveSubject(s) {
+  if (!supabase_client) return;
+  await supabase_client.from('subjects').upsert({ id: s.id, name: s.name, color: s.color||null });
+}
+async function sbDeleteSubject(id) {
+  if (!supabase_client) return;
+  await supabase_client.from('subjects').delete().eq('id', id);
+}
+async function sbSaveRoom(r) {
+  if (!supabase_client) return;
+  await supabase_client.from('rooms').upsert({ id: r.id, name: r.name });
+}
+async function sbDeleteRoom(id) {
+  if (!supabase_client) return;
+  await supabase_client.from('rooms').delete().eq('id', id);
+}
+async function sbSaveSlot(tid, day, period, subject, room, existingId) {
+  if (!supabase_client) return null;
+  if (existingId) {
+    await supabase_client.from('slots').update({ subject, room }).eq('id', existingId);
+    return existingId;
+  } else {
+    const { data } = await supabase_client.from('slots').insert({
+      teacher_id: parseInt(tid), day, period: parseInt(period), subject, room
+    }).select().single();
+    return data ? data.id : null;
+  }
+}
+async function sbDeleteSlot(existingId) {
+  if (!supabase_client || !existingId) return;
+  await supabase_client.from('slots').delete().eq('id', existingId);
+}
+async function sbClearTeacherSlots(tid) {
+  if (!supabase_client) return;
+  await supabase_client.from('slots').delete().eq('teacher_id', parseInt(tid));
+}
+
+function checkAdminPin(callback) {
+  if (isAdminMode) { callback(); return; }
+  const pin = prompt('🔐 กรอก PIN แอดมิน:');
+  if (pin === ADMIN_PIN) { isAdminMode = true; showToast('✅ เข้าสู่โหมดแอดมิน'); callback(); }
+  else if (pin !== null) alert('PIN ไม่ถูกต้อง');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const cfg = getSBConfig();
+  if (cfg && cfg.url && cfg.key) { initSupabase(cfg.url, cfg.key); }
+  else { showSetupModal(); }
+});
+</script>
+
+
 <div class="app">
 <!-- Sidebar -->
 <aside class="sidebar">
@@ -2905,7 +3070,7 @@ function loadData(){
     DB.activityPeriods = {'จันทร์':[7,8],'อังคาร':[7],'พุธ':[7],'พฤหัสบดี':[7],'ศุกร์':[7]};
   }
 }
-function saveData(){try{Store.set('school_timetable_db',JSON.stringify(DB));Store.set('school_timetable_version',DATA_VERSION);}catch(e){}}
+function saveData(){ /* ข้อมูลบันทึกโดยตรงผ่าน Supabase ไม่ใช้ localStorage */ }
 function recalcNextId() {
   nextId.teacher = Math.max(...DB.teachers.map(t=>t.id), 12) + 1;
   nextId.subject = Math.max(...DB.subjects.map(s=>s.id), 16) + 1;
@@ -3137,16 +3302,21 @@ function openAddTeacher() {
 }
 
 function saveTeacher(id) {
-  const name = document.getElementById('f-name').trim();
-  const nick = document.getElementById('f-nick').trim();
-  if (!name||!nick) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
-  if (id) {
-    const t = DB.teachers.find(x=>x.id===id);
-    t.name = name; t.nickname = nick;
-  } else {
-    DB.teachers.push({id: nextId.teacher++, name, nickname: nick});
-  }
-  saveData(); closeModal(); renderTeachers();
+  checkAdminPin(async () => {
+    const name = document.getElementById('f-name').value.trim();
+    const nick = document.getElementById('f-nick').value.trim();
+    if (!name||!nick) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+    if (id) {
+      const t = DB.teachers.find(x=>x.id===id);
+      t.name = name; t.nickname = nick;
+      await sbSaveTeacher(t);
+    } else {
+      const t = {id: nextId.teacher++, name, nickname: nick};
+      DB.teachers.push(t);
+      await sbSaveTeacher(t);
+    }
+    closeModal(); renderTeachers(); showToast('✅ บันทึกข้อมูลครูแล้ว');
+  });
 }
 
 function editTeacher(id) {
@@ -3163,10 +3333,13 @@ function editTeacher(id) {
 }
 
 function deleteTeacher(id) {
-  if (!confirm('ยืนยันการลบครูท่านนี้? ตารางสอนของครูจะถูกลบด้วย')) return;
-  DB.teachers = DB.teachers.filter(t=>t.id!==id);
-  delete DB.slots[id];
-  saveData(); renderTeachers();
+  checkAdminPin(async () => {
+    if (!confirm('ยืนยันการลบครูท่านนี้? ตารางสอนของครูจะถูกลบด้วย')) return;
+    DB.teachers = DB.teachers.filter(t=>t.id!==id);
+    delete DB.slots[id];
+    await sbDeleteTeacher(id);
+    renderTeachers(); showToast('🗑️ ลบครูแล้ว');
+  });
 }
 
 // ล้างคาบของครู (ไม่ลบข้อมูลครู)
@@ -3192,9 +3365,12 @@ function clearTeacherSlotsFromUI() {
   const teacher = DB.teachers.find(t=>t.id===tid);
   const cnt = countTeacherSlots(tid);
   if (!confirm(`ลบคาบสอนทั้งหมดของ ${teacher.nickname} (${teacher.name}) จำนวน ${cnt} คาบ?\nการกระทำนี้ไม่สามารถย้อนกลับ`)) return;
-  clearTeacherSlots(tid);
-  saveData(); renderTimetable(); renderTeachers();
-  showToast(`ลบคาบของ ${teacher.nickname} จำนวน ${cnt} คาบ`);
+  checkAdminPin(async () => {
+    clearTeacherSlots(tid);
+    await sbClearTeacherSlots(tid);
+    renderTimetable(); renderTeachers();
+    showToast(`🗑️ ลบคาบของ ${teacher.nickname} จำนวน ${cnt} คาบ`);
+  });
 }
 
 // ===================== SUBJECTS =====================
@@ -3253,17 +3429,22 @@ function openAddSubject() {
 }
 
 function saveSubject(id) {
-  const code = document.getElementById('f-code').trim();
-  const name = document.getElementById('f-sname').trim();
-  const color = document.getElementById('f-color').value;
-  if (!code||!name) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
-  if (id) {
-    const s = DB.subjects.find(x=>x.id===id);
-    s.code=code; s.name=name; s.color=color;
-  } else {
-    DB.subjects.push({id: nextId.subject++, code, name, color});
-  }
-  saveData(); closeModal(); renderSubjects();
+  checkAdminPin(async () => {
+    const code = document.getElementById('f-code').value.trim();
+    const name = document.getElementById('f-sname').value.trim();
+    const color = document.getElementById('f-color').value;
+    if (!code||!name) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+    if (id) {
+      const s = DB.subjects.find(x=>x.id===id);
+      s.code=code; s.name=name; s.color=color;
+      await sbSaveSubject(s);
+    } else {
+      const s = {id: nextId.subject++, code, name, color};
+      DB.subjects.push(s);
+      await sbSaveSubject(s);
+    }
+    closeModal(); renderSubjects(); showToast('✅ บันทึกวิชาแล้ว');
+  });
 }
 
 function editSubject(id) {
@@ -3283,9 +3464,12 @@ function editSubject(id) {
 }
 
 function deleteSubject(id) {
-  if (!confirm('ยืนยันการลบวิชานี้?')) return;
-  DB.subjects = DB.subjects.filter(s=>s.id!==id);
-  saveData(); renderSubjects();
+  checkAdminPin(async () => {
+    if (!confirm('ยืนยันการลบวิชานี้?')) return;
+    DB.subjects = DB.subjects.filter(s=>s.id!==id);
+    await sbDeleteSubject(id);
+    renderSubjects(); showToast('🗑️ ลบวิชาแล้ว');
+  });
 }
 
 // ===================== ROOMS =====================
@@ -3363,7 +3547,12 @@ function saveRoom(id) {
   } else {
     DB.rooms.push({id: nextId.room++, name, grade: grade||name, students});
   }
-  saveData(); closeModal(); renderRooms();
+  checkAdminPin(async () => {
+    const r = id ? DB.rooms.find(x=>x.id===id) : null;
+    if (r) { r.name=name; r.grade=grade||name; r.students=students; await sbSaveRoom(r); }
+    else { const nr={id:nextId.room++,name,grade:grade||name,students}; DB.rooms.push(nr); await sbSaveRoom(nr); }
+    closeModal(); renderRooms(); showToast('✅ บันทึกห้องแล้ว');
+  });
 }
 
 function editRoom(id) {
@@ -3383,9 +3572,12 @@ function editRoom(id) {
 }
 
 function deleteRoom(id) {
-  if (!confirm('ยืนยันการลบห้องเรียนนี้?')) return;
-  DB.rooms = DB.rooms.filter(r=>r.id!==id);
-  saveData(); renderRooms();
+  checkAdminPin(async () => {
+    if (!confirm('ยืนยันการลบห้องเรียนนี้?')) return;
+    DB.rooms = DB.rooms.filter(r=>r.id!==id);
+    await sbDeleteRoom(id);
+    renderRooms(); showToast('🗑️ ลบห้องแล้ว');
+  });
 }
 
 // ===================== TIMETABLE =====================
@@ -3596,8 +3788,12 @@ function editSlot(tid, day, pid) {
 }
 
 function deleteSlotAndClose(tid, day, pid) {
-  delete DB.slots[tid][day][pid];
-  saveData(); closeModal(); renderTimetable();
+  checkAdminPin(async () => {
+    const existing = DB.slots[tid]?.[day]?.[pid];
+    if (existing?._dbid) await sbDeleteSlot(existing._dbid);
+    delete DB.slots[tid][day][pid];
+    closeModal(); renderTimetable(); showToast('🗑️ ลบคาบแล้ว');
+  });
 }
 
 function saveSlot(tid, day, pid) {
@@ -3607,14 +3803,25 @@ function saveSlot(tid, day, pid) {
   if (!subj) { alert('กรุณาเลือกวิชา'); return; }
   if (!DB.slots[tid]) DB.slots[tid] = {};
   if (!DB.slots[tid][day]) DB.slots[tid][day] = {};
-  DB.slots[tid][day][pid] = {subject: subj, room};
-  saveData(); closeModal(); renderTimetable();
+  checkAdminPin(async () => {
+    if (!DB.slots[tid]) DB.slots[tid] = {};
+    if (!DB.slots[tid][day]) DB.slots[tid][day] = {};
+    const existing = DB.slots[tid][day][pid];
+    const existingId = existing ? existing._dbid : null;
+    const newId = await sbSaveSlot(tid, day, pid, subj, room, existingId);
+    DB.slots[tid][day][pid] = {subject: subj, room, _dbid: newId};
+    closeModal(); renderTimetable(); showToast('✅ บันทึกคาบแล้ว');
+  });
 }
 
 function deleteSlot(tid, day, pid) {
-  if (!confirm('ลบคาบนี้?')) return;
-  delete DB.slots[tid][day][pid];
-  saveData(); renderTimetable();
+  checkAdminPin(async () => {
+    if (!confirm('ลบคาบนี้?')) return;
+    const existing = DB.slots[tid]?.[day]?.[pid];
+    if (existing?._dbid) await sbDeleteSlot(existing._dbid);
+    delete DB.slots[tid][day][pid];
+    renderTimetable(); showToast('🗑️ ลบคาบแล้ว');
+  });
 }
 
 // ===================== ROOM VIEW (drag/drop + delete) =====================
@@ -4938,12 +5145,20 @@ function ensureSampleAssignments() {
   ];
   saveData();
 }
-loadData();
-loadTimeSettings();
-renderDashboard();
-
-// Auto-save on page unload
-window.addEventListener('beforeunload', saveData);
+// loadData() and initApp() are now called by Supabase DOMContentLoaded handler above
+// saveData() is now a no-op (Supabase handles persistence)
+function initApp() {
+  loadTimeSettings();
+  renderDashboard();
+  renderTeachers();
+  renderSubjects();
+  renderRooms();
+  renderTimetable();
+  renderRoomView();
+  renderAssignmentList();
+  checkConflicts();
+  showToast('✅ โหลดข้อมูลสำเร็จ');
+}
 
 // ===================== PWA =====================
 // Register inline Service Worker via Blob
