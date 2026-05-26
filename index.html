@@ -5106,6 +5106,10 @@ function initApp() {
   renderTeachers();
   renderSubjects();
   renderRooms();
+  // populate selects ก่อน render ตาราง
+  populateTtSelect();
+  populateRvSelect();
+  populateDeleteTeacherSelect();
   renderTimetable();
   renderRoomView();
   renderAssignmentList();
