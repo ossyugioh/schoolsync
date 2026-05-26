@@ -1,0 +1,3237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบจัดตารางสอน</title>
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#1a3a5c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ตารางสอน">
+<meta name="application-name" content="ตารางสอน">
+<meta name="description" content="ระบบจัดตารางสอนโรงเรียน">
+<!-- PWA Icons (inline SVG as data URI) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%231a3a5c'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle'%3E📚%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%231a3a5c'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle'%3E📚%3C/text%3E%3C/svg%3E">
+<!-- PWA Manifest (inline) -->
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%AD%E0%B8%99%22%2C%22short_name%22%3A%22%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%AA%E0%B8%AD%E0%B8%99%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f0f4f8%22%2C%22theme_color%22%3A%22%231a3a5c%22%2C%22orientation%22%3A%22landscape%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520192%2520192'%253E%253Crect%2520width%3D'192'%2520height%3D'192'%2520rx%3D'32'%2520fill%3D'%25231a3a5c'%2F%253E%253Ctext%2520x%3D'96'%2520y%3D'130'%2520font-size%3D'100'%2520text-anchor%3D'middle'%253E%25F0%259F%2593%259A%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a3a5c;
+  --primary-light: #2563a8;
+  --accent: #f59e0b;
+  --accent-soft: #fef3c7;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+  --info: #0284c7;
+  --info-soft: #e0f2fe;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+/* Layout */
+.app { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 220px; background: var(--primary); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); }
+.content { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* Sidebar */
+.sidebar-logo { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo h1 { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.sidebar-logo p { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+.nav-section { padding: 12px 16px 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; opacity: 0.4; text-transform: uppercase; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; cursor: pointer; font-size: 13px; transition: background 0.15s; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.08); }
+.nav-item.active { background: rgba(255,255,255,0.12); border-left-color: var(--accent); color: white; font-weight: 600; }
+.nav-icon { width: 18px; text-align: center; font-size: 15px; opacity: 0.8; }
+.sidebar-footer { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; opacity: 0.5; }
+
+/* Topbar */
+.topbar h2 { font-size: 16px; font-weight: 600; flex: 1; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius); border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+.btn-primary { background: var(--primary-light); color: white; }
+.btn-primary:hover { background: var(--primary); }
+.btn-accent { background: var(--accent); color: #78350f; }
+.btn-accent:hover { background: #d97706; }
+.btn-outline { background: white; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-icon { padding: 6px 10px; }
+
+/* Cards */
+.card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-header h3 { font-size: 14px; font-weight: 600; }
+.card-body { padding: 16px 18px; }
+
+/* Stat cards */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 16px; box-shadow: var(--shadow); }
+.stat-card .label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; color: var(--primary); }
+.stat-card .sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.stat-card.accent .value { color: var(--accent); }
+.stat-card.success .value { color: var(--success); }
+.stat-card.danger .value { color: var(--danger); }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg); padding: 9px 12px; text-align: left; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid var(--border); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8fafc; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-blue { background: var(--info-soft); color: var(--info); }
+.badge-green { background: var(--success-soft); color: var(--success); }
+.badge-red { background: var(--danger-soft); color: var(--danger); }
+.badge-yellow { background: var(--accent-soft); color: #92400e; }
+.badge-gray { background: #f1f5f9; color: var(--text-muted); }
+
+/* Timetable grid */
+.tt-wrap { overflow-x: auto; }
+.tt-grid { border-collapse: collapse; min-width: 900px; width: 100%; font-size: 12px; }
+.tt-grid th { background: var(--primary); color: white; padding: 8px 6px; text-align: center; border: 1px solid rgba(255,255,255,0.15); white-space: nowrap; font-size: 11px; }
+.tt-grid td { border: 1px solid var(--border); padding: 3px; vertical-align: top; height: 60px; background: white; }
+.tt-grid td.day-label { background: var(--primary); color: white; font-weight: 600; text-align: center; width: 60px; }
+.tt-grid td.lunch { background: #fef9c3; text-align: center; color: #854d0e; font-size: 11px; font-weight: 500; }
+.cell-slot { background: var(--info-soft); border-radius: 4px; padding: 3px 5px; margin: 1px; font-size: 11px; cursor: pointer; border-left: 3px solid var(--info); position: relative; }
+.cell-slot:hover { filter: brightness(0.95); }
+.cell-slot .subj { font-weight: 600; color: var(--primary); }
+.cell-slot .room { color: var(--text-muted); font-size: 10px; }
+.cell-slot .del-btn { position: absolute; top: 2px; right: 2px; background: var(--danger); color: white; border: none; border-radius: 3px; width: 16px; height: 16px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; opacity: 0; pointer-events: none; transition: opacity 0.15s; line-height: 1; }
+.cell-slot:hover .del-btn { opacity: 1; pointer-events: auto; }
+.add-slot-btn { background: none; border: 1px dashed var(--border); border-radius: 4px; width: 100%; height: 100%; cursor: pointer; color: var(--text-muted); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.add-slot-btn:hover { border-color: var(--primary-light); color: var(--primary-light); background: var(--info-soft); }
+.conflict { background: var(--danger-soft); border-left-color: var(--danger); }
+
+/* Form */
+.form-row { display: grid; gap: 12px; margin-bottom: 12px; }
+.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: inherit; font-size: 13px; background: white; outline: none; transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 2px rgba(37,99,168,0.1); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.modal { background: white; border-radius: var(--radius-lg); width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 15px; font-weight: 700; }
+.modal-body { padding: 20px; }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+.close-btn { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--text-muted); line-height: 1; padding: 0 4px; }
+.close-btn:hover { color: var(--danger); }
+
+/* Alert */
+.alert { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px; }
+.alert-danger { background: var(--danger-soft); color: var(--danger); border: 1px solid #fca5a5; }
+.alert-success { background: var(--success-soft); color: var(--success); border: 1px solid #86efac; }
+.alert-info { background: var(--info-soft); color: var(--info); border: 1px solid #7dd3fc; }
+
+/* Tab */
+.tabs { display: flex; gap: 2px; background: var(--bg); border-radius: var(--radius); padding: 3px; margin-bottom: 16px; }
+.tab { padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted); transition: all 0.15s; }
+.tab.active { background: white; color: var(--primary); box-shadow: var(--shadow); }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* Print */
+@media print {
+  .sidebar, .topbar { display: none; }
+  .main { overflow: visible; }
+  .content { padding: 0; }
+  .btn, .add-slot-btn, .del-btn { display: none !important; }
+  .card { border: none; box-shadow: none; }
+  .tt-grid { page-break-inside: avoid; }
+}
+
+/* Color chips for subjects */
+.color-chip { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+
+.tag { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 11px; font-weight: 500; margin: 1px; }
+
+/* Search */
+.search-box { padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 13px; outline: none; width: 200px; }
+.search-box:focus { border-color: var(--primary-light); }
+
+/* Conflict alert */
+.conflict-list { margin-top: 8px; }
+.conflict-item { padding: 8px 12px; background: var(--danger-soft); border-radius: var(--radius); margin-bottom: 6px; font-size: 12px; color: var(--danger); border-left: 3px solid var(--danger); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .sidebar { width: 180px; }
+}
+
+/* Section hidden */
+.section { display: none; }
+.section.active { display: block; }
+
+/* Colors for slot types */
+.slot-คณิต { border-left-color: #7c3aed; background: #ede9fe; }
+.slot-คณิต .subj { color: #5b21b6; }
+.slot-ไทย { border-left-color: #db2777; background: #fce7f3; }
+.slot-ไทย .subj { color: #9d174d; }
+.slot-อังกฤษ { border-left-color: #0891b2; background: #cffafe; }
+.slot-อังกฤษ .subj { color: #0c4a6e; }
+.slot-วิทย { border-left-color: #16a34a; background: #dcfce7; }
+.slot-วิทย .subj { color: #14532d; }
+.slot-สังคม { border-left-color: #d97706; background: #fef3c7; }
+.slot-สังคม .subj { color: #78350f; }
+.slot-พลศึกษา { border-left-color: #dc2626; background: #fee2e2; }
+.slot-พลศึกษา .subj { color: #7f1d1d; }
+.slot-ศิลปะ { border-left-color: #ea580c; background: #ffedd5; }
+.slot-ศิลปะ .subj { color: #7c2d12; }
+.slot-การงาน { border-left-color: #65a30d; background: #ecfccb; }
+.slot-การงาน .subj { color: #365314; }
+.slot-คอม { border-left-color: #0369a1; background: #e0f2fe; }
+.slot-คอม .subj { color: #0c4a6e; }
+.slot-other { border-left-color: #64748b; background: #f1f5f9; }
+.slot-other .subj { color: #334155; }
+
+/* Drag & Drop */
+.cell-slot[draggable="true"] { cursor: grab; }
+.cell-slot[draggable="true"]:active { cursor: grabbing; }
+.cell-slot.dragging { opacity: 0.4; transform: scale(0.95); }
+.drop-target { background: #dbeafe !important; border: 2px dashed #3b82f6 !important; }
+.drop-target-swap { background: #fef3c7 !important; border: 2px dashed #f59e0b !important; }
+.drag-ghost { position: fixed; pointer-events: none; z-index: 9999; background: white;
+  border-radius: 6px; padding: 6px 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  font-size: 12px; font-weight: 600; color: var(--primary); max-width: 120px; }
+
+/* Chip dots */
+.dot-คณิต { background: #7c3aed; }
+.dot-ไทย { background: #db2777; }
+.dot-อังกฤษ { background: #0891b2; }
+.dot-วิทย { background: #16a34a; }
+.dot-สังคม { background: #d97706; }
+.dot-พลศึกษา { background: #dc2626; }
+.dot-ศิลปะ { background: #ea580c; }
+.dot-การงาน { background: #65a30d; }
+.dot-คอม { background: #0369a1; }
+.dot-other { background: #64748b; }
+</style>
+</head>
+<body>
+
+<div class="app">
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>📚 ระบบจัดตารางสอน</h1>
+    <p>ภาคเรียนที่ 1 / 2569</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">หน้าหลัก</div>
+    <div class="nav-item active" onclick="showSection('dashboard')">
+      <span class="nav-icon">🏠</span> ภาพรวม
+    </div>
+    <div class="nav-section">จัดการ</div>
+    <div class="nav-item" onclick="showSection('teachers')">
+      <span class="nav-icon">👨‍🏫</span> ครูผู้สอน
+    </div>
+    <div class="nav-item" onclick="showSection('subjects')">
+      <span class="nav-icon">📖</span> วิชา
+    </div>
+    <div class="nav-item" onclick="showSection('rooms')">
+      <span class="nav-icon">🏫</span> ห้องเรียน
+    </div>
+    <div class="nav-section">ตารางสอน</div>
+    <div class="nav-item" onclick="showSection('timetable')">
+      <span class="nav-icon">📅</span> ตารางสอน (ครู)
+    </div>
+    <div class="nav-item" onclick="showSection('roomview')">
+      <span class="nav-icon">🗓️</span> ตารางห้องเรียน
+    </div>
+    <div class="nav-item" onclick="showSection('freeperiods')">
+      <span class="nav-icon">☕</span> คาบว่างครูทั้งโรงเรียน
+    </div>
+    <div class="nav-item" onclick="showSection('conflicts')">
+      <span class="nav-icon">⚠️</span> ตรวจชนซ้อน
+    </div>
+    <div class="nav-section">เครื่องมือ</div>
+    <div class="nav-item" onclick="showSection('timesettings')">
+      <span class="nav-icon">⏰</span> ตั้งค่าเวลาคาบ
+    </div>
+    <div class="nav-item" onclick="showSection('autoschedule')">
+      <span class="nav-icon">🤖</span> จัดตารางอัตโนมัติ
+    </div>
+  </nav>
+  <div class="sidebar-footer">เวอร์ชัน 1.0 | บันทึกอัตโนมัติ</div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <h2 id="topbar-title">ภาพรวม</h2>
+    <input class="search-box" type="text" placeholder="🔍 ค้นหา..." id="globalSearch" oninput="doSearch(this.value)">
+    <button class="btn btn-outline btn-sm" onclick="exportData()">💾 บันทึกข้อมูล</button>
+    <button class="btn btn-outline btn-sm" onclick="importData()">📂 โหลดข้อมูล</button>
+    <button class="btn btn-outline btn-sm" onclick="generatePrintableForCurrent()">🖨️ สร้างไฟล์ปริ้น</button>
+    <button class="btn btn-accent btn-sm" onclick="window.print()">🖨️ พิมพ์</button>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="section-dashboard" class="section active">
+      <div class="stats-grid" id="stats-grid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-header"><h3>ครูทั้งหมด</h3></div>
+          <div class="card-body" id="dash-teachers"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>ภาพรวมคาบสอน</h3></div>
+          <div class="card-body" id="dash-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEACHERS -->
+    <div id="section-teachers" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>ครูผู้สอนทั้งหมด</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddTeacher()">+ เพิ่มครู</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table id="teacher-table">
+              <thead><tr><th>#</th><th>ชื่อ-นามสกุล</th><th>ชื่อเล่น</th><th>คาบสอน/สัปดาห์</th><th>กิจกรรม/สัปดาห์</th><th>รวม</th><th>วิชาที่สอน</th><th>จัดการ</th></tr></thead>
+              <tbody id="teacher-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBJECTS -->
+    <div id="section-subjects" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>วิชาเรียนทั้งหมด</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddSubject()">+ เพิ่มวิชา</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table id="subject-table">
+              <thead><tr><th>#</th><th>รหัสวิชา</th><th>ชื่อวิชา</th><th>สี</th><th>คาบทั้งหมด</th><th>จัดการ</th></tr></thead>
+              <tbody id="subject-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROOMS -->
+    <div id="section-rooms" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>ห้องเรียนทั้งหมด</h3>
+          <button class="btn btn-primary btn-sm" onclick="openAddRoom()">+ เพิ่มห้อง</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>ห้องเรียน</th><th>ระดับชั้น</th><th>จำนวนนักเรียน</th><th>จัดการ</th></tr></thead>
+              <tbody id="room-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMETABLE -->
+    <div id="section-timetable" class="section">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <label style="font-weight:600">เลือกครู:</label>
+        <select id="tt-teacher-select" onchange="renderTimetable()" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:13px;min-width:220px">
+        </select>
+        <span id="tt-period-count" class="badge badge-blue"></span>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:12px">
+          <div class="tt-wrap">
+            <table class="tt-grid" id="tt-grid"></table>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap" id="legend"></div>
+      <div id="tt-missing" style="margin-top:12px;font-size:13px;color:var(--text-muted)"></div>
+    </div>
+
+    <!-- ROOM VIEW -->
+    <div id="section-roomview" class="section">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <label style="font-weight:600">เลือกห้อง:</label>
+        <select id="rv-room-select" onchange="renderRoomView()" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:13px;min-width:160px"></select>
+        <span style="font-size:12px;color:var(--text-muted)">🖱️ ลากเพื่อย้าย/สลับ · โฮเวอร์เพื่อลบ ×</span>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:12px">
+          <div class="tt-wrap"><table class="tt-grid" id="rv-grid"></table></div>
+          <div id="rv-missing" style="margin-top:8px;font-size:13px;color:var(--text-muted)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIME SETTINGS -->
+    <div id="section-timesettings" class="section">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header" style="background:linear-gradient(90deg,#1a3a5c,#2563a8);color:white;border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:24px">⏰</span>
+            <div>
+              <h3 style="color:white;margin:0">ตั้งค่าเวลาแต่ละคาบ</h3>
+              <div style="font-size:11px;opacity:.75;margin-top:1px">กำหนดเวลาเริ่ม ระยะเวลาต่อคาบ และพักกลางวัน — ทุกตารางจะอัปเดตอัตโนมัติ</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Row 1: เวลาเริ่ม + ระยะเวลาต่อคาบ -->
+          <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:20px;align-items:flex-end">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:12px;font-weight:600;color:var(--text-muted)">เวลาเริ่มคาบแรก</label>
+              <input type="time" id="ts-start" value="08:30" style="padding:8px 12px;border-radius:var(--radius);border:1.5px solid var(--border);font-family:inherit;font-size:15px;width:130px">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:12px;font-weight:600;color:var(--text-muted)">ระยะเวลาต่อคาบ (นาที)</label>
+              <input type="number" id="ts-duration" value="60" min="10" max="120" style="padding:8px 12px;border-radius:var(--radius);border:1.5px solid var(--border);font-family:inherit;font-size:15px;width:130px">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:12px;font-weight:600;color:var(--text-muted)">พักกลางวัน เริ่ม</label>
+              <input type="time" id="ts-lunch-start" value="12:00" style="padding:8px 12px;border-radius:var(--radius);border:1.5px solid var(--border);font-family:inherit;font-size:15px;width:130px">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label style="font-size:12px;font-weight:600;color:var(--text-muted)">พักกลางวัน สิ้นสุด</label>
+              <input type="time" id="ts-lunch-end" value="13:00" style="padding:8px 12px;border-radius:var(--radius);border:1.5px solid var(--border);font-family:inherit;font-size:15px;width:130px">
+            </div>
+            <button class="btn btn-primary" onclick="applyTimeSettings()">✅ บันทึกและอัปเดต</button>
+          </div>
+          <!-- Preview -->
+          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">ตัวอย่างตาราง</div>
+          <div id="ts-preview" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTOSCHEDULE -->
+    <div id="section-autoschedule" class="section">
+
+      <!-- Step 1: Activity Periods -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header" style="background:linear-gradient(90deg,#1a3a5c 0%,#2563a8 100%);color:white;border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">1</span>
+            <div>
+              <h3 style="color:white;margin:0">กำหนดคาบกิจกรรมรวม</h3>
+              <div style="font-size:11px;opacity:0.75;margin-top:1px">คาบที่กำหนดจะไม่ถูกจัดวิชาลงไป เช่น ชุมนุม ลูกเสือ จริยธรรม</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="activity-grid" style="overflow-x:auto"></div>
+        </div>
+      </div>
+
+      <!-- Step 2: Teaching Load -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header" style="background:linear-gradient(90deg,#1a3a5c 0%,#2563a8 100%);color:white;border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+          <div style="display:flex;align-items:center;gap:10px;flex:1">
+            <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">2</span>
+            <div>
+              <h3 style="color:white;margin:0">ภาระสอน</h3>
+              <div style="font-size:11px;opacity:0.75;margin-top:1px">กำหนดว่าครูคนไหนสอนวิชาอะไร ห้องไหน กี่คาบ/สัปดาห์</div>
+            </div>
+            <button class="btn btn-sm" style="margin-left:auto;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3)" onclick="addAssignment()">+ เพิ่มภาระสอน</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div id="assignment-list"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Run -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header" style="background:linear-gradient(90deg,#1a3a5c 0%,#2563a8 100%);color:white;border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="background:rgba(255,255,255,0.2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">3</span>
+            <div>
+              <h3 style="color:white;margin:0">รันจัดตาราง</h3>
+              <div style="font-size:11px;opacity:0.75;margin-top:1px">ระบบจะจัดคาบสอนให้ครูทุกคนโดยไม่ชนซ้อน</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+            <!-- Main actions -->
+            <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px">
+              <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">เริ่มจัด</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-accent" style="flex:1" onclick="runAutoSchedule()">🤖 จัดตารางเดี๋ยวนี้</button>
+                <button class="btn btn-primary" style="flex:1" onclick="runAutoScheduleUntilComplete()">🔄 ทำจนเสร็จ</button>
+              </div>
+            </div>
+            <!-- Divider -->
+            <div style="width:1px;background:var(--border);align-self:stretch;margin:0 4px"></div>
+            <!-- Clear actions -->
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:280px">
+              <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">ล้างข้อมูล</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <select id="delete-teacher-select" style="flex:1;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border);font-family:inherit;font-size:13px;background:white">
+                  <option value="">-- เลือกครู --</option>
+                </select>
+                <button class="btn btn-outline btn-sm" onclick="resetAutoSchedule()" title="ล้างเฉพาะคาบที่จัดโดยอัตโนมัติ">🗑️ ล้างอัตโนมัติ</button>
+                <button class="btn btn-danger btn-sm" onclick="clearTeacherSlotsFromUI()" title="ลบคาบทั้งหมดของครูที่เลือก">🧹 ลบครูนี้</button>
+              </div>
+            </div>
+            <!-- Save/Export -->
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:180px">
+              <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">บันทึก</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline btn-sm" onclick="saveLocal()">💾 บันทึก</button>
+                <button class="btn btn-outline btn-sm" onclick="exportData()">⬇️ Export</button>
+                <button class="btn btn-outline btn-sm" onclick="importData()">⬆️ Import</button>
+              </div>
+            </div>
+          </div>
+          <!-- Danger zone -->
+          <div style="margin-top:12px;padding:10px 14px;background:#fff8f8;border:1px solid #fca5a5;border-radius:var(--radius);display:flex;align-items:center;gap:10px">
+            <span style="font-size:16px">⚠️</span>
+            <div style="flex:1;font-size:12px;color:var(--danger)">โหลด Baseline ใหม่จะล้างข้อมูลปัจจุบันใน localStorage ทั้งหมด</div>
+            <button class="btn btn-danger btn-sm" onclick="clearLocalAndLoadBaseline()">♻️ โหลด Baseline</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- คำชี้แจงสำคัญ -->
+      <div style="margin-bottom:16px;padding:14px 16px;background:linear-gradient(135deg,#fffbeb,#fef9c3);border:1.5px solid #fcd34d;border-radius:var(--radius-lg);display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:22px;line-height:1">📌</span>
+        <div>
+          <div style="font-weight:700;color:#92400e;margin-bottom:4px;font-size:14px">หมายเหตุสำคัญเกี่ยวกับคาบกิจกรรม</div>
+          <div style="font-size:13px;color:#78350f;line-height:1.7">
+            การจัดตารางอัตโนมัติจะจัดเฉพาะ<strong>คาบสอนวิชา</strong>เท่านั้น<br>
+            หลังจากตารางลงตัวแล้ว ให้ครูแต่ละคนไปเพิ่ม<strong>คาบกิจกรรม</strong> (ชุมนุม / ลูกเสือ / จริยธรรม / แนะแนว / กพด. / PLC ฯลฯ) ด้วยตนเองผ่านหน้า <strong>ตารางสอน (ครู)</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Log -->
+      <div class="card">
+        <div class="card-header">
+          <h3>📋 ผลการจัด</h3>
+        </div>
+        <div class="card-body" id="autoschedule-log">
+          <div class="alert alert-info">กำหนดภาระสอนและคาบกิจกรรม แล้วกด "จัดตารางเดี๋ยวนี้"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFLICTS -->
+    <div id="section-conflicts" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h3>ตรวจสอบการชนซ้อน</h3>
+          <button class="btn btn-primary btn-sm" onclick="checkConflicts()">🔍 ตรวจสอบ</button>
+        </div>
+        <div class="card-body" id="conflict-body">
+          <div class="alert alert-info">กดปุ่ม "ตรวจสอบ" เพื่อหาการชนซ้อน</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FREE PERIODS -->
+    <div id="section-freeperiods" class="section">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)">
+          <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#dcfce7;border:1.5px solid #4ade80"></span>ว่าง 1–3 คน
+          <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#bbf7d0;border:1.5px solid #16a34a;margin-left:8px"></span>ว่าง 4–7 คน
+          <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#4ade80;border:1.5px solid #15803d;margin-left:8px"></span>ว่าง 8+ คน
+          <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#f1f5f9;border:1.5px solid #cbd5e1;margin-left:8px"></span>ครูสอนครบ
+        </div>
+        <button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="renderFreePeriods()">🔄 รีเฟรช</button>
+      </div>
+      <div class="card">
+        <div class="card-body" style="padding:0;overflow-x:auto">
+          <div id="free-periods-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div id="modal-overlay" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-title">Modal</h3>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const DAYS = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'];
+// ===================== TIME SETTINGS =====================
+var TIME_SETTINGS = {
+  startTime: '08:30',
+  duration: 60,       // นาทีต่อคาบ
+  lunchStart: '12:00',
+  lunchEnd: '13:00'
+};
+
+function timeToMins(t) {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+function minsToTime(m) {
+  const h = Math.floor(m / 60);
+  const min = m % 60;
+  return `${String(h).padStart(2,'0')}.${String(min).padStart(2,'0')}`;
+}
+
+function buildPeriods() {
+  const ts = TIME_SETTINGS;
+  const start = timeToMins(ts.startTime);
+  const dur = parseInt(ts.duration) || 60;
+  const lunchS = timeToMins(ts.lunchStart);
+  const lunchE = timeToMins(ts.lunchEnd);
+  const NUM_PERIODS = 9; // คาบ 1-9
+
+  const periods = [];
+  let cur = start;
+  let periodNum = 1;
+
+  for (let i = 0; i < NUM_PERIODS; i++) {
+    // แทรกพักกลางวันถ้าเวลาเริ่มคาบถัดไปอยู่หลัง lunchStart
+    if (cur >= lunchS && cur < lunchE && !periods.find(p => p.isLunch)) {
+      periods.push({ id: 'lunch', label: `${minsToTime(lunchS)}-${minsToTime(lunchE)}`, isLunch: true });
+      cur = lunchE;
+    }
+    const end = cur + dur;
+    periods.push({ id: periodNum, label: `${minsToTime(cur)}-${minsToTime(end)}` });
+    cur = end;
+    periodNum++;
+    if (periodNum > NUM_PERIODS) break;
+  }
+  // เพิ่มพักกลางวันท้ายสุดถ้ายังไม่ได้แทรก
+  if (!periods.find(p => p.isLunch)) {
+    const insertAt = periods.findIndex(p => timeToMins(p.label.split('-')[0].replace('.',':')) >= lunchS);
+    const lunchSlot = { id: 'lunch', label: `${minsToTime(lunchS)}-${minsToTime(lunchE)}`, isLunch: true };
+    if (insertAt >= 0) periods.splice(insertAt, 0, lunchSlot);
+    else periods.push(lunchSlot);
+  }
+  return periods;
+}
+
+var PERIODS = buildPeriods();
+
+function saveTimeSettings() {
+  localStorage.setItem('timetable_time_settings', JSON.stringify(TIME_SETTINGS));
+}
+function loadTimeSettings() {
+  const saved = localStorage.getItem('timetable_time_settings');
+  if (saved) {
+    try { TIME_SETTINGS = {...TIME_SETTINGS, ...JSON.parse(saved)}; } catch(e) {}
+  }
+  PERIODS = buildPeriods();
+}
+
+function applyTimeSettings() {
+  TIME_SETTINGS.startTime   = document.getElementById('ts-start').value || '08:30';
+  TIME_SETTINGS.duration    = parseInt(document.getElementById('ts-duration').value) || 60;
+  TIME_SETTINGS.lunchStart  = document.getElementById('ts-lunch-start').value || '12:00';
+  TIME_SETTINGS.lunchEnd    = document.getElementById('ts-lunch-end').value || '13:00';
+  PERIODS = buildPeriods();
+  saveTimeSettings();
+  renderTimePreview();
+  // รีเฟรชทุกตาราง
+  renderTimetable && renderTimetable();
+  renderRoomView && renderRoomView();
+  renderFreePeriods && renderFreePeriods();
+  checkConflicts && checkConflicts();
+  showToast('✅ อัปเดตเวลาคาบเรียบร้อยแล้ว');
+}
+
+function renderTimePreview() {
+  const ps = buildPeriods();
+  document.getElementById('ts-preview').innerHTML = ps.map(p => {
+    if (p.isLunch) return `<div style="display:flex;flex-direction:column;align-items:center;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:8px;padding:8px 12px;min-width:90px">
+      <span style="font-size:16px">🍽️</span>
+      <span style="font-size:11px;font-weight:600;color:#92400e;margin-top:2px">พักกลางวัน</span>
+      <span style="font-size:11px;color:#78350f">${p.label}</span>
+    </div>`;
+    return `<div style="display:flex;flex-direction:column;align-items:center;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:8px 12px;min-width:90px">
+      <span style="font-size:13px;font-weight:700;color:#1d4ed8">คาบ ${p.id}</span>
+      <span style="font-size:11px;color:#1e40af;margin-top:2px">${p.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function initTimeSettings() {
+  loadTimeSettings();
+  document.getElementById('ts-start').value = TIME_SETTINGS.startTime;
+  document.getElementById('ts-duration').value = TIME_SETTINGS.duration;
+  document.getElementById('ts-lunch-start').value = TIME_SETTINGS.lunchStart;
+  document.getElementById('ts-lunch-end').value = TIME_SETTINGS.lunchEnd;
+  renderTimePreview();
+  ['ts-start','ts-duration','ts-lunch-start','ts-lunch-end'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      const tmp = {
+        startTime: document.getElementById('ts-start').value || '08:30',
+        duration: parseInt(document.getElementById('ts-duration').value) || 60,
+        lunchStart: document.getElementById('ts-lunch-start').value || '12:00',
+        lunchEnd: document.getElementById('ts-lunch-end').value || '13:00'
+      };
+      const saved = TIME_SETTINGS;
+      TIME_SETTINGS = tmp;
+      renderTimePreview();
+      TIME_SETTINGS = saved;
+    });
+  });
+}
+
+const SUBJECT_COLORS = {
+  'คณิต':'คณิต','คณิตศาสตร์':'คณิต',
+  'ไทย':'ไทย','ท.หลัก':'ไทย','ไทยหลัก':'ไทย','ไทยเพิ่ม':'ไทย','ท.เพิ่ม':'ไทย',
+  'อ.หลัก':'อังกฤษ','อ.เพิ่ม':'อังกฤษ','ภาษาอังกฤษ':'อังกฤษ',
+  'วิทย์':'วิทย','วิทยาศาสตร์':'วิทย','ว.คำนวณ':'วิทย',
+  'สังคม':'สังคม','ประวัติ':'สังคม','ประวัติศาสตร์':'สังคม',
+  'พลศึกษา':'พลศึกษา','สุขศึกษา':'พลศึกษา',
+  'ศิลปะ':'ศิลปะ',
+  'การงาน':'การงาน','กอท.':'การงาน',
+  'คอม':'คอม','คอมพิวเตอร์':'คอม',
+};
+
+function getSlotColor(subj) {
+  if (!subj) return 'other';
+  for (const [k,v] of Object.entries(SUBJECT_COLORS)) {
+    if (subj.includes(k)) return v;
+  }
+  return 'other';
+}
+
+// DEFAULT DATA from imported file
+let DB = {
+  teachers: [
+    {id:1, name:'เสาวณี สีธูป', nickname:'ครูไกด์'},
+    {id:2, name:'ณัฐกรณ์ คำสา', nickname:'ครูโต้ง'},
+    {id:3, name:'พัลลภ คำวันนา', nickname:'ครูโค้'},
+    {id:4, name:'รุ่งทิวา ดวงเป็ง', nickname:'ครูบิ๊ม'},
+    {id:5, name:'ณัฐวุฒิ เงินสันเทียะ', nickname:'ครูอ๊อด'},
+    {id:6, name:'ชมัยพร นันต๊ะจันทร์', nickname:'ครูกุ้ง'},
+    {id:7, name:'พรศิลป์ มั่นคงผ่องใส', nickname:'ครูต่าย'},
+    {id:8, name:'ดารารัตน์ เทพาชุมพู', nickname:'ครูอ้อม'},
+    {id:9, name:'คนธรส เพียงพรทิพย์', nickname:'ครูหนุ่ย'},
+    {id:10, name:'ขวัญภิรมย์ เด็ดขาด', nickname:'ครูขวัญ'},
+    {id:11, name:'วีรพงษ์ ผาแสนเถิน', nickname:'ครูเอส'},
+    {id:12, name:'ภัทรสุดา ห้าวหาญคุณธรรม', nickname:'ครูพัช'},
+  ],
+  subjects: [
+    {id:1,code:'คณิต',name:'คณิตศาสตร์',color:'#7c3aed'},
+    {id:2,code:'ไทยหลัก',name:'ภาษาไทย (หลัก)',color:'#db2777'},
+    {id:3,code:'ไทยเพิ่ม',name:'ภาษาไทย (เพิ่มเติม)',color:'#db2777'},
+    {id:4,code:'อ.หลัก',name:'ภาษาอังกฤษ (หลัก)',color:'#0891b2'},
+    {id:5,code:'อ.เพิ่ม',name:'ภาษาอังกฤษ (เพิ่มเติม)',color:'#0891b2'},
+    {id:6,code:'วิทย์',name:'วิทยาศาสตร์',color:'#16a34a'},
+    {id:7,code:'สังคม',name:'สังคมศึกษา',color:'#d97706'},
+    {id:8,code:'ประวัติ',name:'ประวัติศาสตร์',color:'#d97706'},
+    {id:9,code:'พลศึกษา',name:'พลศึกษา',color:'#dc2626'},
+    {id:10,code:'สุขศึกษา',name:'สุขศึกษา',color:'#dc2626'},
+    {id:11,code:'ศิลปะ',name:'ศิลปะ',color:'#ea580c'},
+    {id:12,code:'การงาน',name:'การงานอาชีพ',color:'#65a30d'},
+    {id:13,code:'คอม',name:'คอมพิวเตอร์',color:'#0369a1'},
+    {id:14,code:'ว.คำนวณ',name:'วิทยาการคำนวณ',color:'#16a34a'},
+    {id:15,code:'ต้านทุจริต',name:'ต้านทุจริต',color:'#64748b'},
+    {id:16,code:'กอท.',name:'กอท.',color:'#65a30d'},
+  ],
+  rooms: [
+    {id:1,name:'ป.1/1',grade:'ป.1',students:25},
+    {id:2,name:'ป.1/2',grade:'ป.1',students:25},
+    {id:3,name:'ป.2',grade:'ป.2',students:28},
+    {id:4,name:'ป.3',grade:'ป.3',students:27},
+    {id:5,name:'ป.4',grade:'ป.4',students:30},
+    {id:6,name:'ป.5',grade:'ป.5',students:29},
+    {id:7,name:'ป.6',grade:'ป.6',students:28},
+    {id:8,name:'อ.2/1',grade:'อ.2',students:20},
+    {id:9,name:'อ.2/2',grade:'อ.2',students:20},
+    {id:10,name:'อ.3',grade:'อ.3',students:22},
+  ],
+  // slots: {teacherId: {day: {periodId: {subject, room}}}}
+  slots: {
+    1: { // ครูไกด์
+      'จันทร์': {1:{subject:'คณิต',room:'ป.1/1'},2:{subject:'ไทยหลัก',room:'ป.1/1'},4:{subject:'อ.หลัก',room:'ป.1/1'},6:{subject:'สอนเสริม',room:'ป.1/1'},7:{subject:'กิจกรรม กพด.',room:''},8:{subject:'กิจกรรม PLC',room:''}},
+      'อังคาร': {1:{subject:'ไทยหลัก',room:'ป.1/1'},3:{subject:'อ.หลัก',room:'ป.1/1'},5:{subject:'คณิต',room:'ป.1/1'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {3:{subject:'ไทยหลัก',room:'ป.1/1'},5:{subject:'คณิต',room:'ป.1/1'},6:{subject:'สอนเสริม',room:'ป.1/1'},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {2:{subject:'ไทยเพิ่ม',room:'ป.1/1'},3:{subject:'ไทยหลัก',room:'ป.1/1'},5:{subject:'คณิต',room:'ป.1/1'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {1:{subject:'อ.หลัก',room:'ป.1/1'},2:{subject:'คณิต',room:'ป.1/1'},3:{subject:'ไทยหลัก',room:'ป.1/1'},7:{subject:'แนะแนว',room:''}},
+    },
+    2: { // ครูโต้ง
+      'จันทร์': {3:{subject:'พลศึกษา',room:'ป.2'},5:{subject:'พลศึกษา',room:'ป.3'},6:{subject:'พลศึกษา',room:'ป.5'},7:{subject:'สอนเสริม',room:''}},
+      'อังคาร': {5:{subject:'สุขศึกษา',room:'ป.4'},6:{subject:'สุขศึกษา',room:'ป.1/1'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {1:{subject:'สุขศึกษา',room:'ป.3'},3:{subject:'สุขศึกษา',room:'ป.2'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {2:{subject:'พลศึกษา',room:'ป.1/2'},3:{subject:'พลศึกษา',room:'ป.4'},5:{subject:'พลศึกษา',room:'ป.6'},6:{subject:'พลศึกษา',room:'ป.1/1'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {3:{subject:'สุขศึกษา',room:'ป.5'},5:{subject:'สุขศึกษา',room:'ป.1/2'},6:{subject:'สุขศึกษา',room:'ป.6'},7:{subject:'แนะแนว',room:''}},
+    },
+    3: { // ครูโค้
+      'จันทร์': {1:{subject:'ท.หลัก',room:'ป.5'},3:{subject:'ท.หลัก',room:'ป.6'},6:{subject:'ท.หลัก',room:'ป.4'},7:{subject:'สอนเสริม',room:''},8:{subject:'กิจกรรม กพด.',room:''},9:{subject:'กิจกรรม PLC',room:''}},
+      'อังคาร': {1:{subject:'ท.หลัก',room:'ป.5'},2:{subject:'ท.หลัก',room:'ป.4'},3:{subject:'ท.หลัก',room:'ป.6'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {1:{subject:'ท.หลัก',room:'ป.5'},5:{subject:'ท.หลัก',room:'ป.6'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {2:{subject:'ท.หลัก',room:'ป.6'},5:{subject:'ท.หลัก',room:'ป.4'},6:{subject:'ไทยเพิ่ม',room:'ป.3'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {2:{subject:'ท.หลัก',room:'ป.5'},3:{subject:'ท.หลัก',room:'ป.4'},7:{subject:'แนะแนว',room:''}},
+    },
+    4: { // ครูบิ๊ม
+      'จันทร์': {2:{subject:'ศิลปะ',room:'ป.5'},3:{subject:'สังคม',room:'ป.1/1'},5:{subject:'สังคม',room:'ป.1/2'},7:{subject:'สอนเสริม',room:''}},
+      'อังคาร': {2:{subject:'สังคม',room:'ป.1/1'},3:{subject:'ศิลปะ',room:'ป.4'},6:{subject:'ศิลปะ',room:'ป.6'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {2:{subject:'ศิลปะ',room:'ป.5'},5:{subject:'ศิลปะ',room:'ป.1/2'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {2:{subject:'ศิลปะ',room:'ป.4'},3:{subject:'ศิลปะ',room:'ป.6'},6:{subject:'สังคม',room:'ป.1/2'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {2:{subject:'ศิลปะ',room:'ป.2'},5:{subject:'ศิลปะ',room:'ป.1/1'},6:{subject:'ศิลปะ',room:'ป.3'},7:{subject:'แนะแนว',room:''}},
+    },
+    5: { // ครูอ๊อด
+      'จันทร์': {2:{subject:'คอม',room:'อ.2/1'},6:{subject:'ต้านทุจริต',room:'ป.1/1'},7:{subject:'สอนเสริม',room:''}},
+      'อังคาร': {2:{subject:'คอม',room:'อ.2/2'},3:{subject:'การงาน',room:'ป.2'},5:{subject:'การงาน',room:'ป.5'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {2:{subject:'คอม',room:'อ.3'},3:{subject:'การงาน',room:'ป.6'},5:{subject:'การงาน',room:'ป.4'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {1:{subject:'การงาน',room:'ป.1/1'},3:{subject:'ต้านทุจริต',room:'ป.1/2'},5:{subject:'การงาน',room:'ป.3'},6:{subject:'กอท.',room:'ป.5'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {1:{subject:'การงาน',room:'ป.6'},2:{subject:'การงาน',room:'ป.4'},6:{subject:'การงาน',room:'ป.1/2'},7:{subject:'แนะแนว',room:''}},
+    },
+    6: { // ครูกุ้ง
+      'จันทร์': {1:{subject:'ว.คำนวณ',room:'ป.4'},3:{subject:'คณิต',room:'ป.3'},5:{subject:'ท.หลัก',room:'ป.2'},7:{subject:'สอนเสริม',room:'ป.3'},8:{subject:'กิจกรรม กพด.',room:''},9:{subject:'กิจกรรม PLC',room:''}},
+      'อังคาร': {1:{subject:'คณิต',room:'ป.3'},5:{subject:'ว.คำนวณ',room:'ป.6'},6:{subject:'ท.หลัก',room:'ป.2'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {1:{subject:'ท.หลัก',room:'ป.2'},3:{subject:'คณิต',room:'ป.3'},6:{subject:'สอนเสริม',room:'ป.3'},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {1:{subject:'คณิต',room:'ป.3'},3:{subject:'ท.หลัก',room:'ป.2'},6:{subject:'ท.เพิ่ม',room:'ป.2'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {3:{subject:'คณิต',room:'ป.3'},5:{subject:'ท.หลัก',room:'ป.2'},6:{subject:'ว.คำนวณ',room:'ป.5'},7:{subject:'แนะแนว',room:''}},
+    },
+    7: { // ครูต่าย
+      'จันทร์': {2:{subject:'สังคม',room:'ป.6'},5:{subject:'ประวัติ',room:'ป.4'},6:{subject:'สังคม',room:'ป.2'},7:{subject:'สอนเสริม',room:'ป.4'}},
+      'อังคาร': {2:{subject:'สังคม',room:'ป.2'},3:{subject:'ประวัติ',room:'ป.3'},6:{subject:'สังคม',room:'ป.5'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {1:{subject:'สังคม',room:'ป.4'},2:{subject:'สังคม',room:'ป.6'},3:{subject:'สังคม',room:'ป.5'},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {2:{subject:'สังคม',room:'ป.3'},6:{subject:'สังคม',room:'ป.4'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {1:{subject:'ประวัติ',room:'ป.5'},3:{subject:'ประวัติ',room:'ป.6'},5:{subject:'สังคม',room:'ป.3'},7:{subject:'แนะแนว',room:''}},
+    },
+    8: { // ครูอ้อม
+      'จันทร์': {1:{subject:'วิทย์',room:'ป.3'},2:{subject:'วิทย์',room:'ป.3'},5:{subject:'วิทย์',room:'ป.6'},6:{subject:'วิทย์',room:'ป.6'},7:{subject:'สอนเสริม',room:''}},
+      'อังคาร': {2:{subject:'วิทย์',room:'ป.1/2'},3:{subject:'วิทย์',room:'ป.1/2'},6:{subject:'วิทย์',room:'ป.4'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {1:{subject:'วิทย์',room:'ป.1/1'},2:{subject:'วิทย์',room:'ป.1/1'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {1:{subject:'วิทย์',room:'ป.2'},2:{subject:'วิทย์',room:'ป.2'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {2:{subject:'วิทย์',room:'ป.6'},5:{subject:'วิทย์',room:'ป.4'},6:{subject:'วิทย์',room:'ป.4'},7:{subject:'แนะแนว',room:''}},
+    },
+    9: { // ครูหนุ่ย
+      'จันทร์': {1:{subject:'ไทยหลัก',room:'ป.1/2'},3:{subject:'คณิต',room:'ป.1/2'},6:{subject:'ไทยหลัก',room:'ป.3'},7:{subject:'สอนเสริม',room:''},8:{subject:'อ่านออก พิเศษ',room:''},9:{subject:'กิจกรรม PLC',room:''}},
+      'อังคาร': {1:{subject:'คณิต',room:'ป.1/2'},2:{subject:'ไทยหลัก',room:'ป.3'},5:{subject:'ไทยหลัก',room:'ป.1/2'},7:{subject:'ชุมนุม',room:''},8:{subject:'กพด',room:''}},
+      'พุธ': {1:{subject:'คณิต',room:'ป.1/2'},2:{subject:'ไทยหลัก',room:'ป.1/2'},5:{subject:'ไทยหลัก',room:'ป.3'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''},8:{subject:'อ่านออก พิเศษ',room:''}},
+      'พฤหัสบดี': {1:{subject:'ไทยหลัก',room:'ป.1/2'},3:{subject:'ไทยหลัก',room:'ป.3'},5:{subject:'คณิต',room:'ป.1/2'},7:{subject:'จริยธรรม',room:''},8:{subject:'กพด',room:''}},
+      'ศุกร์': {1:{subject:'ไทยหลัก',room:'ป.1/2'},2:{subject:'ไทยหลัก',room:'ป.3'},3:{subject:'คณิต',room:'ป.1/2'},7:{subject:'แนะแนว',room:''}},
+    },
+    10: { // ครูขวัญ
+      'จันทร์': {1:{subject:'คณิต',room:'ป.6'},2:{subject:'คณิต',room:'ป.4'},3:{subject:'คณิต',room:'ป.5'},7:{subject:'สอนเสริม',room:''}},
+      'อังคาร': {1:{subject:'คณิต',room:'ป.4'},2:{subject:'คณิต',room:'ป.6'},3:{subject:'คณิต',room:'ป.5'},5:{subject:'ต้านทุจริต',room:'ป.3'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {1:{subject:'คณิต',room:'ป.6'},2:{subject:'คณิต',room:'ป.4'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {1:{subject:'คณิต',room:'ป.6'},3:{subject:'คณิต',room:'ป.5'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {1:{subject:'คณิต',room:'ป.4'},3:{subject:'ต้านทุจริต',room:'ป.2'},5:{subject:'คณิต',room:'ป.5'},7:{subject:'แนะแนว',room:''}},
+    },
+    11: { // ครูเอส
+      'จันทร์': {1:{subject:'คณิต',room:'ป.2'},2:{subject:'อ.หลัก',room:'ป.1/2'},6:{subject:'ท.เพิ่ม',room:'ป.1/2'},7:{subject:'สอนเสริม',room:''},8:{subject:'กิจกรรม กพด.',room:''},9:{subject:'กิจกรรม PLC',room:''}},
+      'อังคาร': {1:{subject:'คณิต',room:'ป.2'},5:{subject:'ประวัติ',room:'ป.2'},6:{subject:'อ.หลัก',room:'ป.1/2'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {2:{subject:'คณิต',room:'ป.2'},3:{subject:'อ.หลัก',room:'ป.1/2'},5:{subject:'วิทย์',room:'ป.5'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {1:{subject:'วิทย์',room:'ป.5'},2:{subject:'วิทย์',room:'ป.5'},5:{subject:'คณิต',room:'ป.2'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {1:{subject:'คณิต',room:'ป.2'},2:{subject:'ประวัติ',room:'ป.1/2'},6:{subject:'ประวัติ',room:'ป.1/1'},7:{subject:'แนะแนว',room:''}},
+    },
+    12: { // ครูพัช
+      'จันทร์': {2:{subject:'อ.หลัก',room:'ป.2'},3:{subject:'อ.หลัก',room:'ป.4'},5:{subject:'อ.หลัก',room:'ป.5'},7:{subject:'สอนเสริม',room:''}},
+      'อังคาร': {1:{subject:'อ.เพิ่ม',room:'ป.6'},2:{subject:'อ.หลัก',room:'ป.5'},6:{subject:'อ.หลัก',room:'ป.3'},7:{subject:'ชุมนุม',room:''}},
+      'พุธ': {2:{subject:'อ.หลัก',room:'ป.3'},3:{subject:'อ.หลัก',room:'ป.4'},5:{subject:'อ.หลัก',room:'ป.2'},6:{subject:'สอนเสริม',room:''},7:{subject:'ลูกเสือ',room:''}},
+      'พฤหัสบดี': {1:{subject:'อ.เพิ่ม',room:'ป.4'},5:{subject:'อ.เพิ่ม',room:'ป.5'},6:{subject:'อ.หลัก',room:'ป.6'},7:{subject:'จริยธรรม',room:''}},
+      'ศุกร์': {1:{subject:'อ.หลัก',room:'ป.3'},5:{subject:'อ.หลัก',room:'ป.6'},6:{subject:'อ.หลัก',room:'ป.2'},7:{subject:'แนะแนว',room:''}},
+    },
+  },
+  activityPeriods: {
+    'จันทร์':    [7, 8],
+    'อังคาร':   [7],
+    'พุธ':       [7],
+    'พฤหัสบดี': [7],
+    'ศุกร์':     [7],
+  },
+  assignments: [{"tid": 1, "subject": "คณิต", "room": "ป.1/1", "periodsPerWeek": 5}, {"tid": 1, "subject": "สอนเสริม", "room": "ป.1/1", "periodsPerWeek": 2}, {"tid": 1, "subject": "อ.หลัก", "room": "ป.1/1", "periodsPerWeek": 3}, {"tid": 1, "subject": "ไทยหลัก", "room": "ป.1/1", "periodsPerWeek": 5}, {"tid": 1, "subject": "ไทยเพิ่ม", "room": "ป.1/1", "periodsPerWeek": 1}, {"tid": 2, "subject": "พลศึกษา", "room": "ป.1/1", "periodsPerWeek": 1}, {"tid": 2, "subject": "สุขศึกษา", "room": "ป.1/1", "periodsPerWeek": 1}, {"tid": 4, "subject": "ศิลปะ", "room": "ป.1/1", "periodsPerWeek": 1}, {"tid": 4, "subject": "สังคม", "room": "ป.1/1", "periodsPerWeek": 2}, {"tid": 5, "subject": "การงาน", "room": "ป.1/1", "periodsPerWeek": 1}, {"tid": 5, "subject": "ต้านทุจริต", "room": "ป.1/1", "periodsPerWeek": 1}, {"tid": 8, "subject": "วิทย์", "room": "ป.1/1", "periodsPerWeek": 2}, {"tid": 11, "subject": "ประวัติ", "room": "ป.1/1", "periodsPerWeek": 1}, {"tid": 2, "subject": "พลศึกษา", "room": "ป.1/2", "periodsPerWeek": 1}, {"tid": 2, "subject": "สุขศึกษา", "room": "ป.1/2", "periodsPerWeek": 1}, {"tid": 4, "subject": "ศิลปะ", "room": "ป.1/2", "periodsPerWeek": 1}, {"tid": 4, "subject": "สังคม", "room": "ป.1/2", "periodsPerWeek": 2}, {"tid": 5, "subject": "การงาน", "room": "ป.1/2", "periodsPerWeek": 1}, {"tid": 5, "subject": "ต้านทุจริต", "room": "ป.1/2", "periodsPerWeek": 1}, {"tid": 8, "subject": "วิทย์", "room": "ป.1/2", "periodsPerWeek": 2}, {"tid": 9, "subject": "คณิต", "room": "ป.1/2", "periodsPerWeek": 5}, {"tid": 9, "subject": "ไทยหลัก", "room": "ป.1/2", "periodsPerWeek": 5}, {"tid": 11, "subject": "ท.เพิ่ม", "room": "ป.1/2", "periodsPerWeek": 1}, {"tid": 11, "subject": "ประวัติ", "room": "ป.1/2", "periodsPerWeek": 1}, {"tid": 11, "subject": "อ.หลัก", "room": "ป.1/2", "periodsPerWeek": 3}, {"tid": 2, "subject": "พลศึกษา", "room": "ป.2", "periodsPerWeek": 1}, {"tid": 2, "subject": "สุขศึกษา", "room": "ป.2", "periodsPerWeek": 1}, {"tid": 4, "subject": "ศิลปะ", "room": "ป.2", "periodsPerWeek": 1}, {"tid": 5, "subject": "การงาน", "room": "ป.2", "periodsPerWeek": 1}, {"tid": 6, "subject": "ท.หลัก", "room": "ป.2", "periodsPerWeek": 5}, {"tid": 6, "subject": "ท.เพิ่ม", "room": "ป.2", "periodsPerWeek": 1}, {"tid": 7, "subject": "สังคม", "room": "ป.2", "periodsPerWeek": 2}, {"tid": 8, "subject": "วิทย์", "room": "ป.2", "periodsPerWeek": 2}, {"tid": 10, "subject": "ต้านทุจริต", "room": "ป.2", "periodsPerWeek": 1}, {"tid": 11, "subject": "คณิต", "room": "ป.2", "periodsPerWeek": 5}, {"tid": 11, "subject": "ประวัติ", "room": "ป.2", "periodsPerWeek": 1}, {"tid": 12, "subject": "อ.หลัก", "room": "ป.2", "periodsPerWeek": 3}, {"tid": 2, "subject": "พลศึกษา", "room": "ป.3", "periodsPerWeek": 1}, {"tid": 2, "subject": "สุขศึกษา", "room": "ป.3", "periodsPerWeek": 1}, {"tid": 3, "subject": "ไทยเพิ่ม", "room": "ป.3", "periodsPerWeek": 1}, {"tid": 4, "subject": "ศิลปะ", "room": "ป.3", "periodsPerWeek": 1}, {"tid": 5, "subject": "การงาน", "room": "ป.3", "periodsPerWeek": 1}, {"tid": 6, "subject": "คณิต", "room": "ป.3", "periodsPerWeek": 5}, {"tid": 6, "subject": "สอนเสริม", "room": "ป.3", "periodsPerWeek": 2}, {"tid": 7, "subject": "ประวัติ", "room": "ป.3", "periodsPerWeek": 1}, {"tid": 7, "subject": "สังคม", "room": "ป.3", "periodsPerWeek": 2}, {"tid": 8, "subject": "วิทย์", "room": "ป.3", "periodsPerWeek": 2}, {"tid": 9, "subject": "ไทยหลัก", "room": "ป.3", "periodsPerWeek": 5}, {"tid": 10, "subject": "ต้านทุจริต", "room": "ป.3", "periodsPerWeek": 1}, {"tid": 12, "subject": "อ.หลัก", "room": "ป.3", "periodsPerWeek": 3}, {"tid": 2, "subject": "พลศึกษา", "room": "ป.4", "periodsPerWeek": 1}, {"tid": 2, "subject": "สุขศึกษา", "room": "ป.4", "periodsPerWeek": 1}, {"tid": 3, "subject": "ท.หลัก", "room": "ป.4", "periodsPerWeek": 4}, {"tid": 4, "subject": "ศิลปะ", "room": "ป.4", "periodsPerWeek": 2}, {"tid": 5, "subject": "การงาน", "room": "ป.4", "periodsPerWeek": 2}, {"tid": 6, "subject": "ว.คำนวณ", "room": "ป.4", "periodsPerWeek": 1}, {"tid": 7, "subject": "ประวัติ", "room": "ป.4", "periodsPerWeek": 1}, {"tid": 7, "subject": "สอนเสริม", "room": "ป.4", "periodsPerWeek": 1}, {"tid": 7, "subject": "สังคม", "room": "ป.4", "periodsPerWeek": 2}, {"tid": 8, "subject": "วิทย์", "room": "ป.4", "periodsPerWeek": 3}, {"tid": 10, "subject": "คณิต", "room": "ป.4", "periodsPerWeek": 4}, {"tid": 12, "subject": "อ.หลัก", "room": "ป.4", "periodsPerWeek": 2}, {"tid": 12, "subject": "อ.เพิ่ม", "room": "ป.4", "periodsPerWeek": 1}, {"tid": 2, "subject": "พลศึกษา", "room": "ป.5", "periodsPerWeek": 1}, {"tid": 2, "subject": "สุขศึกษา", "room": "ป.5", "periodsPerWeek": 1}, {"tid": 3, "subject": "ท.หลัก", "room": "ป.5", "periodsPerWeek": 4}, {"tid": 4, "subject": "ศิลปะ", "room": "ป.5", "periodsPerWeek": 2}, {"tid": 5, "subject": "กอท.", "room": "ป.5", "periodsPerWeek": 1}, {"tid": 5, "subject": "การงาน", "room": "ป.5", "periodsPerWeek": 1}, {"tid": 6, "subject": "ว.คำนวณ", "room": "ป.5", "periodsPerWeek": 1}, {"tid": 7, "subject": "ประวัติ", "room": "ป.5", "periodsPerWeek": 1}, {"tid": 7, "subject": "สังคม", "room": "ป.5", "periodsPerWeek": 2}, {"tid": 10, "subject": "คณิต", "room": "ป.5", "periodsPerWeek": 4}, {"tid": 11, "subject": "วิทย์", "room": "ป.5", "periodsPerWeek": 3}, {"tid": 12, "subject": "อ.หลัก", "room": "ป.5", "periodsPerWeek": 2}, {"tid": 12, "subject": "อ.เพิ่ม", "room": "ป.5", "periodsPerWeek": 1}, {"tid": 2, "subject": "พลศึกษา", "room": "ป.6", "periodsPerWeek": 1}, {"tid": 2, "subject": "สุขศึกษา", "room": "ป.6", "periodsPerWeek": 1}, {"tid": 3, "subject": "ท.หลัก", "room": "ป.6", "periodsPerWeek": 4}, {"tid": 4, "subject": "ศิลปะ", "room": "ป.6", "periodsPerWeek": 2}, {"tid": 5, "subject": "การงาน", "room": "ป.6", "periodsPerWeek": 2}, {"tid": 6, "subject": "ว.คำนวณ", "room": "ป.6", "periodsPerWeek": 1}, {"tid": 7, "subject": "ประวัติ", "room": "ป.6", "periodsPerWeek": 1}, {"tid": 7, "subject": "สังคม", "room": "ป.6", "periodsPerWeek": 2}, {"tid": 8, "subject": "วิทย์", "room": "ป.6", "periodsPerWeek": 3}, {"tid": 10, "subject": "คณิต", "room": "ป.6", "periodsPerWeek": 4}, {"tid": 12, "subject": "อ.หลัก", "room": "ป.6", "periodsPerWeek": 2}, {"tid": 12, "subject": "อ.เพิ่ม", "room": "ป.6", "periodsPerWeek": 1}, {"tid": 5, "subject": "คอม", "room": "อ.2/1", "periodsPerWeek": 1}, {"tid": 5, "subject": "คอม", "room": "อ.2/2", "periodsPerWeek": 1}, {"tid": 5, "subject": "คอม", "room": "อ.3", "periodsPerWeek": 1}]
+};
+
+// Override nextId and optionally load baseline DB from provided JSON
+DB = {
+  "teachers": [
+    {"id": 1, "name": "เสาวณี สีธูป", "nickname": "ครูไกด์"},
+    {"id": 2, "name": "ณัฐกรณ์ คำสา", "nickname": "ครูโต้ง"},
+    {"id": 3, "name": "พัลลภ คำวันนา", "nickname": "ครูโค้"},
+    {"id": 4, "name": "รุ่งทิวา ดวงเป็ง", "nickname": "ครูบิ๊ม"},
+    {"id": 5, "name": "ณัฐวุฒิ เงินสันเทียะ", "nickname": "ครูอ๊อด"},
+    {"id": 6, "name": "ชมัยพร นันต๊ะจันทร์", "nickname": "ครูกุ้ง"},
+    {"id": 7, "name": "พรศิลป์ มั่นคงผ่องใส", "nickname": "ครูต่าย"},
+    {"id": 8, "name": "ดารารัตน์ เทพาชุมพู", "nickname": "ครูอ้อม"},
+    {"id": 9, "name": "คนธรส เพียงพรทิพย์", "nickname": "ครูหนุ่ย"},
+    {"id": 10, "name": "ขวัญภิรมย์ เด็ดขาด", "nickname": "ครูขวัญ"},
+    {"id": 11, "name": "วีรพงษ์ ผาแสนเถิน", "nickname": "ครูเอส"},
+    {"id": 12, "name": "ภัทรสุดา ห้าวหาญคุณธรรม", "nickname": "ครูพัช"}
+  ],
+  "subjects": [
+    {"id":1,"code":"คณิต","name":"คณิตศาสตร์","color":"#7c3aed"},
+    {"id":2,"code":"ไทยหลัก","name":"ภาษาไทย (หลัก)","color":"#db2777"},
+    {"id":3,"code":"ไทยเพิ่ม","name":"ภาษาไทย (เพิ่มเติม)","color":"#db2777"},
+    {"id":4,"code":"อ.หลัก","name":"ภาษาอังกฤษ (หลัก)","color":"#0891b2"},
+    {"id":5,"code":"อ.เพิ่ม","name":"ภาษาอังกฤษ (เพิ่มเติม)","color":"#0891b2"},
+    {"id":6,"code":"วิทย์","name":"วิทยาศาสตร์","color":"#16a34a"},
+    {"id":7,"code":"สังคม","name":"สังคมศึกษา","color":"#d97706"},
+    {"id":8,"code":"ประวัติ","name":"ประวัติศาสตร์","color":"#d97706"},
+    {"id":9,"code":"พลศึกษา","name":"พลศึกษา","color":"#dc2626"},
+    {"id":10,"code":"สุขศึกษา","name":"สุขศึกษา","color":"#dc2626"},
+    {"id":11,"code":"ศิลปะ","name":"ศิลปะ","color":"#ea580c"},
+    {"id":12,"code":"การงาน","name":"การงานอาชีพ","color":"#65a30d"},
+    {"id":13,"code":"คอม","name":"คอมพิวเตอร์","color":"#0369a1"},
+    {"id":14,"code":"ว.คำนวณ","name":"วิทยาการคำนวณ","color":"#16a34a"},
+    {"id":15,"code":"ต้านทุจริต","name":"ต้านทุจริต","color":"#64748b"}
+  ],
+  "rooms": [
+    {"id":1,"name":"ป.1/1","grade":"ป.1","students":25},
+    {"id":2,"name":"ป.1/2","grade":"ป.1","students":25},
+    {"id":3,"name":"ป.2","grade":"ป.2","students":28},
+    {"id":4,"name":"ป.3","grade":"ป.3","students":27},
+    {"id":5,"name":"ป.4","grade":"ป.4","students":30},
+    {"id":6,"name":"ป.5","grade":"ป.5","students":29},
+    {"id":7,"name":"ป.6","grade":"ป.6","students":28},
+    {"id":8,"name":"อ.2/1","grade":"อ.2","students":20},
+    {"id":9,"name":"อ.2/2","grade":"อ.2","students":20},
+    {"id":10,"name":"อ.3","grade":"อ.3","students":22}
+  ],
+  "slots": {
+    "1": {"จันทร์":{"2":{"subject":"อ.หลัก","room":"ป.1/1","auto":true},"4":{"subject":"คณิต","room":"ป.1/1","auto":true},"5":{"subject":"ไทยหลัก","room":"ป.1/1","auto":true}},"พฤหัสบดี":{"2":{"subject":"คณิต","room":"ป.1/1","auto":true},"3":{"subject":"ไทยหลัก","room":"ป.1/1","auto":true},"4":{"subject":"อ.หลัก","room":"ป.1/1","auto":true}},"ศุกร์":{"1":{"subject":"อ.หลัก","room":"ป.1/1","auto":true},"2":{"subject":"ไทยเพิ่ม","room":"ป.1/1","auto":true},"3":{"subject":"ไทยหลัก","room":"ป.1/1","auto":true},"5":{"subject":"คณิต","room":"ป.1/1","auto":true}},"พุธ":{"2":{"subject":"ไทยหลัก","room":"ป.1/1","auto":true},"4":{"subject":"คณิต","room":"ป.1/1","auto":true}},"อังคาร":{"4":{"subject":"ไทยหลัก","room":"ป.1/1","auto":true},"5":{"subject":"คณิต","room":"ป.1/1","auto":true}}},
+    "2": {"อังคาร":{"2":{"subject":"สุขศึกษา","room":"ป.1/1","auto":true},"5":{"subject":"สุขศึกษา","room":"ป.5","auto":true}},"จันทร์":{"2":{"subject":"สุขศึกษา","room":"ป.2","auto":true},"3":{"subject":"พลศึกษา","room":"ป.1/1","auto":true},"4":{"subject":"สุขศึกษา","room":"ป.1/2","auto":true},"5":{"subject":"พลศึกษา","room":"ป.6","auto":true}},"พฤหัสบดี":{"2":{"subject":"พลศึกษา","room":"ป.1/2","auto":true},"3":{"subject":"สุขศึกษา","room":"ป.4","auto":true},"4":{"subject":"สุขศึกษา","room":"ป.3","auto":true}},"ศุกร์":{"1":{"subject":"พลศึกษา","room":"ป.3","auto":true},"2":{"subject":"พลศึกษา","room":"ป.5","auto":true},"3":{"subject":"พลศึกษา","room":"ป.4","auto":true},"5":{"subject":"พลศึกษา","room":"ป.2","auto":true}},"พุธ":{"4":{"subject":"สุขศึกษา","room":"ป.6","auto":true}}},
+    "3": {"จันทร์":{"2":{"subject":"ท.หลัก","room":"ป.5","auto":true},"3":{"subject":"ท.หลัก","room":"ป.6","auto":true},"4":{"subject":"ท.หลัก","room":"ป.4","auto":true}},"พฤหัสบดี":{"2":{"subject":"ไทยเพิ่ม","room":"ป.3","auto":true},"3":{"subject":"ท.หลัก","room":"ป.5","auto":true},"4":{"subject":"ท.หลัก","room":"ป.4","auto":true},"5":{"subject":"ท.หลัก","room":"ป.6","auto":true}},"ศุกร์":{"1":{"subject":"ท.หลัก","room":"ป.5","auto":true},"3":{"subject":"ท.หลัก","room":"ป.6","auto":true},"5":{"subject":"ท.หลัก","room":"ป.4","auto":true}},"พุธ":{"4":{"subject":"ท.หลัก","room":"ป.5","auto":true}},"อังคาร":{"4":{"subject":"ท.หลัก","room":"ป.6","auto":true},"5":{"subject":"ท.หลัก","room":"ป.4","auto":true}}},
+    "4": {"พุธ":{"1":{"subject":"สังคม","room":"ป.1/1","auto":true}},"พฤหัสบดี":{"2":{"subject":"ศิลปะ","room":"ป.2","auto":true},"3":{"subject":"ศิลปะ","room":"ป.6","auto":true},"4":{"subject":"ศิลปะ","room":"ป.5","auto":true},"5":{"subject":"ศิลปะ","room":"ป.1/1","auto":true}},"ศุกร์":{"1":{"subject":"สังคม","room":"ป.1/2","auto":true},"2":{"subject":"ศิลปะ","room":"ป.4","auto":true},"3":{"subject":"ศิลปะ","room":"ป.5","auto":true},"5":{"subject":"ศิลปะ","room":"ป.1/2","auto":true}},"จันทร์":{"2":{"subject":"สังคม","room":"ป.1/2","auto":true},"4":{"subject":"ศิลปะ","room":"ป.3","auto":true},"5":{"subject":"ศิลปะ","room":"ป.4","auto":true}},"อังคาร":{"1":{"subject":"สังคม","room":"ป.1/1","auto":true},"5":{"subject":"ศิลปะ","room":"ป.6","auto":true}}},
+    "5": {"พฤหัสบดี":{"1":{"subject":"ต้านทุจริต","room":"ป.1/1","auto":true},"2":{"subject":"การงาน","room":"ป.4","auto":true},"4":{"subject":"การงาน","room":"ป.1/2","auto":true}},"อังคาร":{"1":{"subject":"การงาน","room":"ป.5","auto":true},"2":{"subject":"การงาน","room":"ป.6","auto":true}},"ศุกร์":{"1":{"subject":"การงาน","room":"ป.6","auto":true},"3":{"subject":"ต้านทุจริต","room":"ป.1/2","auto":true},"5":{"subject":"การงาน","room":"ป.3","auto":true}},"จันทร์":{"2":{"subject":"การงาน","room":"ป.4","auto":true},"4":{"subject":"การงาน","room":"ป.2","auto":true}},"พุธ":{"1":{"subject":"การงาน","room":"ป.5","auto":true},"3":{"subject":"การงาน","room":"ป.1/1","auto":true}}},
+    "6": {"พุธ":{"2":{"subject":"คณิต","room":"ป.3","auto":true},"4":{"subject":"ท.หลัก","room":"ป.2","auto":true}},"ศุกร์":{"1":{"subject":"ท.หลัก","room":"ป.2","auto":true},"2":{"subject":"คณิต","room":"ป.3","auto":true},"3":{"subject":"ท.เพิ่ม","room":"ป.2","auto":true}},"จันทร์":{"2":{"subject":"คณิต","room":"ป.3","auto":true},"3":{"subject":"ว.คำนวณ","room":"ป.4","auto":true},"4":{"subject":"ว.คำนวณ","room":"ป.6","auto":true},"5":{"subject":"ท.หลัก","room":"ป.2","auto":true}},"อังคาร":{"4":{"subject":"คณิต","room":"ป.3","auto":true},"5":{"subject":"ท.หลัก","room":"ป.2","auto":true}},"พฤหัสบดี":{"2":{"subject":"ว.คำนวณ","room":"ป.5","auto":true},"3":{"subject":"คณิต","room":"ป.3","auto":true},"4":{"subject":"ท.หลัก","room":"ป.2","auto":true}}},
+    "7": {"พุธ":{"4":{"subject":"สังคม","room":"ป.4","auto":true}},"จันทร์":{"2":{"subject":"สังคม","room":"ป.6","auto":true},"3":{"subject":"สังคม","room":"ป.5","auto":true},"4":{"subject":"ประวัติ","room":"ป.5","auto":true},"5":{"subject":"สังคม","room":"ป.3","auto":true}},"อังคาร":{"4":{"subject":"สังคม","room":"ป.4","auto":true},"5":{"subject":"สังคม","room":"ป.3","auto":true}},"ศุกร์":{"1":{"subject":"ประวัติ","room":"ป.4","auto":true},"2":{"subject":"สังคม","room":"ป.2","auto":true},"3":{"subject":"ประวัติ","room":"ป.3","auto":true},"5":{"subject":"สังคม","room":"ป.5","auto":true}},"พฤหัสบดี":{"2":{"subject":"ประวัติ","room":"ป.6","auto":true},"3":{"subject":"สังคม","room":"ป.2","auto":true},"4":{"subject":"สังคม","room":"ป.6","auto":true}}},
+    "8": {"พฤหัสบดี":{"1":{"subject":"วิทย์","room":"ป.6","auto":true},"3":{"subject":"วิทย์","room":"ป.1/2","auto":true},"5":{"subject":"วิทย์","room":"ป.4","auto":true}},"จันทร์":{"1":{"subject":"วิทย์","room":"ป.1/1","auto":true},"3":{"subject":"วิทย์","room":"ป.2","auto":true}},"พุธ":{"1":{"subject":"วิทย์","room":"ป.6","auto":true},"2":{"subject":"วิทย์","room":"ป.4","auto":true},"4":{"subject":"วิทย์","room":"ป.3","auto":true}},"ศุกร์":{"2":{"subject":"วิทย์","room":"ป.1/2","auto":true},"4":{"subject":"วิทย์","room":"ป.1/1","auto":true},"5":{"subject":"วิทย์","room":"ป.6","auto":true}},"อังคาร":{"1":{"subject":"วิทย์","room":"ป.4","auto":true},"2":{"subject":"วิทย์","room":"ป.3","auto":true},"4":{"subject":"วิทย์","room":"ป.2","auto":true}}},
+    "9": {"อังคาร":{"1":{"subject":"ไทยหลัก","room":"ป.3","auto":true},"3":{"subject":"ไทยหลัก","room":"ป.1/2","auto":true},"4":{"subject":"ไทยหลัก","room":"ป.1/2","auto":true},"5":{"subject":"คณิต","room":"ป.1/2","auto":true}},"จันทร์":{"1":{"subject":"ไทยหลัก","room":"ป.3","auto":true},"3":{"subject":"ไทยหลัก","room":"ป.1/2","auto":true},"5":{"subject":"คณิต","room":"ป.1/2","auto":true}},"ศุกร์":{"4":{"subject":"คณิต","room":"ป.1/2","auto":true}},"พฤหัสบดี":{"1":{"subject":"ไทยหลัก","room":"ป.1/2","auto":true},"5":{"subject":"คณิต","room":"ป.1/2","auto":true}},"พุธ":{"1":{"subject":"ไทยหลัก","room":"ป.3","auto":true},"2":{"subject":"ไทยหลัก","room":"ป.1/2","auto":true},"4":{"subject":"คณิต","room":"ป.1/2","auto":true}}},
+    "10": {"อังคาร":{"1":{"subject":"คณิต","room":"ป.6","auto":true},"2":{"subject":"ต้านทุจริต","room":"ป.2","auto":true},"3":{"subject":"คณิต","room":"ป.6","auto":true},"4":{"subject":"คณิต","room":"ป.5","auto":true}},"พุธ":{"1":{"subject":"คณิต","room":"ป.4","auto":true},"2":{"subject":"คณิต","room":"ป.5","auto":true},"3":{"subject":"คณิต","room":"ป.6","auto":true}},"พฤหัสบดี":{"1":{"subject":"คณิต","room":"ป.4","auto":true},"5":{"subject":"คณิต","room":"ป.5","auto":true}},"ศุกร์":{"2":{"subject":"คณิต","room":"ป.6","auto":true},"4":{"subject":"คณิต","room":"ป.4","auto":true}},"จันทร์":{"1":{"subject":"คณิต","room":"ป.4","auto":true},"3":{"subject":"ต้านทุจริต","room":"ป.3","auto":true},"5":{"subject":"คณิต","room":"ป.5","auto":true}}},
+    "11": {"อังคาร":{"1":{"subject":"อ.หลัก","room":"ป.1/2","auto":true},"2":{"subject":"ท.เพิ่ม","room":"ป.1/2","auto":true},"3":{"subject":"ประวัติ","room":"ป.1/1","auto":true}},"พฤหัสบดี":{"1":{"subject":"ประวัติ","room":"ป.2","auto":true},"5":{"subject":"คณิต","room":"ป.2","auto":true}},"ศุกร์":{"4":{"subject":"คณิต","room":"ป.2","auto":true}},"พุธ":{"1":{"subject":"ประวัติ","room":"ป.1/2","auto":true},"2":{"subject":"คณิต","room":"ป.2","auto":true},"3":{"subject":"อ.หลัก","room":"ป.1/2","auto":true}},"จันทร์":{"1":{"subject":"อ.หลัก","room":"ป.1/2","auto":true}}},
+    "12": {"อังคาร":{"1":{"subject":"อ.หลัก","room":"ป.2","auto":true},"2":{"subject":"อ.หลัก","room":"ป.4","auto":true},"3":{"subject":"อ.เพิ่ม","room":"ป.4","auto":true}},"พฤหัสบดี":{"1":{"subject":"อ.หลัก","room":"ป.5","auto":true},"5":{"subject":"อ.หลัก","room":"ป.3","auto":true}},"ศุกร์":{"4":{"subject":"อ.หลัก","room":"ป.3","auto":true}},"พุธ":{"1":{"subject":"อ.หลัก","room":"ป.2","auto":true},"2":{"subject":"อ.หลัก","room":"ป.6","auto":true},"3":{"subject":"อ.หลัก","room":"ป.3","auto":true}},"จันทร์":{"1":{"subject":"อ.หลัก","room":"ป.2","auto":true}}},
+    "13": {},
+    "14": {},
+    "15": {},
+    "16": {}
+  },
+  "activityPeriods": {"จันทร์":[6,7,8],"อังคาร":[6,7,8],"พุธ":[6,7,8,5],"พฤหัสบดี":[6,7,8],"ศุกร์":[6,7,8]},
+  "assignments": [
+    {"tid":1,"subject":"คณิต","room":"ป.1/1","periodsPerWeek":5},
+    {"tid":1,"subject":"อ.หลัก","room":"ป.1/1","periodsPerWeek":3},
+    {"tid":1,"subject":"ไทยหลัก","room":"ป.1/1","periodsPerWeek":5},
+    {"tid":1,"subject":"ไทยเพิ่ม","room":"ป.1/1","periodsPerWeek":1},
+    {"tid":2,"subject":"พลกีฬา","room":"ป.1/1","periodsPerWeek":1},
+    {"tid":2,"subject":"สุขศึกษา","room":"ป.1/1","periodsPerWeek":1},
+    {"tid":4,"subject":"ศิลปะ","room":"ป.1/1","periodsPerWeek":1},
+    {"tid":4,"subject":"สังคม","room":"ป.1/1","periodsPerWeek":2},
+    {"tid":5,"subject":"การงาน","room":"ป.1/1","periodsPerWeek":1},
+    {"tid":5,"subject":"ต้านทุจริต","room":"ป.1/1","periodsPerWeek":1},
+    {"tid":8,"subject":"วิทย์","room":"ป.1/1","periodsPerWeek":2},
+    {"tid":11,"subject":"ประวัติ","room":"ป.1/1","periodsPerWeek":1}
+  ]
+};
+
+nextId = { teacher: Math.max(...DB.teachers.map(t=>t.id),0)+1, subject: Math.max(...DB.subjects.map(s=>s.id),0)+1, room: Math.max(...DB.rooms.map(r=>r.id),0)+1 };
+
+// Full assignment list from timetable_backup.json (91 items, all rooms)
+const FULL_ASSIGNMENTS = [
+    {tid:1, subject:'คณิต', room:'ป.1/1', periodsPerWeek:5},
+    {tid:1, subject:'อ.หลัก', room:'ป.1/1', periodsPerWeek:3},
+    {tid:1, subject:'ไทยหลัก', room:'ป.1/1', periodsPerWeek:5},
+    {tid:1, subject:'ไทยเพิ่ม', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.1/1', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:4, subject:'ศิลปะ', room:'ป.1/1', periodsPerWeek:1},
+    {tid:4, subject:'สังคม', room:'ป.1/1', periodsPerWeek:2},
+
+    {tid:5, subject:'การงาน', room:'ป.1/1', periodsPerWeek:1},
+    {tid:5, subject:'ต้านทุจริต', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:8, subject:'วิทย์', room:'ป.1/1', periodsPerWeek:2},
+    {tid:11, subject:'ประวัติ', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.1/2', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.1/2', periodsPerWeek:1},
+    {tid:4, subject:'ศิลปะ', room:'ป.1/2', periodsPerWeek:1},
+    {tid:4, subject:'สังคม', room:'ป.1/2', periodsPerWeek:2},
+    {tid:5, subject:'การงาน', room:'ป.1/2', periodsPerWeek:1},
+    {tid:5, subject:'ต้านทุจริต', room:'ป.1/2', periodsPerWeek:1},
+    {tid:8, subject:'วิทย์', room:'ป.1/2', periodsPerWeek:2},
+
+    {tid:9, subject:'คณิต', room:'ป.1/2', periodsPerWeek:5},
+    {tid:9, subject:'ไทยหลัก', room:'ป.1/2', periodsPerWeek:5},
+    {tid:11, subject:'ท.เพิ่ม', room:'ป.1/2', periodsPerWeek:1},
+    {tid:11, subject:'ประวัติ', room:'ป.1/2', periodsPerWeek:1},
+    {tid:11, subject:'อ.หลัก', room:'ป.1/2', periodsPerWeek:3},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.2', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.2', periodsPerWeek:1},
+    {tid:4, subject:'ศิลปะ', room:'ป.2', periodsPerWeek:1},
+    {tid:5, subject:'การงาน', room:'ป.2', periodsPerWeek:1},
+    {tid:6, subject:'ท.หลัก', room:'ป.2', periodsPerWeek:5},
+    {tid:6, subject:'ท.เพิ่ม', room:'ป.2', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.2', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.2', periodsPerWeek:2},
+    {tid:10, subject:'ต้านทุจริต', room:'ป.2', periodsPerWeek:1},
+    {tid:11, subject:'คณิต', room:'ป.2', periodsPerWeek:5},
+    {tid:11, subject:'ประวัติ', room:'ป.2', periodsPerWeek:1},
+    {tid:12, subject:'อ.หลัก', room:'ป.2', periodsPerWeek:3},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.3', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.3', periodsPerWeek:1},
+    {tid:3, subject:'ไทยเพิ่ม', room:'ป.3', periodsPerWeek:1},
+    {tid:4, subject:'ศิลปะ', room:'ป.3', periodsPerWeek:1},
+    {tid:5, subject:'การงาน', room:'ป.3', periodsPerWeek:1},
+    {tid:6, subject:'คณิต', room:'ป.3', periodsPerWeek:5},
+    {tid:7, subject:'ประวัติ', room:'ป.3', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.3', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.3', periodsPerWeek:2},
+    {tid:9, subject:'ไทยหลัก', room:'ป.3', periodsPerWeek:5},
+    {tid:10, subject:'ต้านทุจริต', room:'ป.3', periodsPerWeek:1},
+    {tid:12, subject:'อ.หลัก', room:'ป.3', periodsPerWeek:3},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.4', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.4', periodsPerWeek:1},
+    {tid:3, subject:'ท.หลัก', room:'ป.4', periodsPerWeek:4},
+    {tid:4, subject:'ศิลปะ', room:'ป.4', periodsPerWeek:2},
+    {tid:5, subject:'การงาน', room:'ป.4', periodsPerWeek:2},
+    {tid:6, subject:'ว.คำนวณ', room:'ป.4', periodsPerWeek:1},
+    {tid:7, subject:'ประวัติ', room:'ป.4', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.4', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.4', periodsPerWeek:3},
+    {tid:10, subject:'คณิต', room:'ป.4', periodsPerWeek:4},
+    {tid:12, subject:'อ.หลัก', room:'ป.4', periodsPerWeek:2},
+    {tid:12, subject:'อ.เพิ่ม', room:'ป.4', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.5', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.5', periodsPerWeek:1},
+    {tid:3, subject:'ท.หลัก', room:'ป.5', periodsPerWeek:4},
+    {tid:4, subject:'ศิลปะ', room:'ป.5', periodsPerWeek:2},
+    {tid:6, subject:'ว.คำนวณ', room:'ป.5', periodsPerWeek:1},
+    {tid:7, subject:'ประวัติ', room:'ป.5', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.5', periodsPerWeek:2},
+    {tid:10, subject:'คณิต', room:'ป.5', periodsPerWeek:4},
+    {tid:11, subject:'วิทย์', room:'ป.5', periodsPerWeek:3},
+    {tid:12, subject:'อ.หลัก', room:'ป.5', periodsPerWeek:2},
+    {tid:12, subject:'อ.เพิ่ม', room:'ป.5', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.6', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.6', periodsPerWeek:1},
+    {tid:3, subject:'ท.หลัก', room:'ป.6', periodsPerWeek:4},
+    {tid:4, subject:'ศิลปะ', room:'ป.6', periodsPerWeek:2},
+    {tid:5, subject:'การงาน', room:'ป.6', periodsPerWeek:2},
+    {tid:6, subject:'ว.คำนวณ', room:'ป.6', periodsPerWeek:1},
+    {tid:7, subject:'ประวัติ', room:'ป.6', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.6', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.6', periodsPerWeek:3},
+    {tid:10, subject:'คณิต', room:'ป.6', periodsPerWeek:4},
+    {tid:12, subject:'อ.หลัก', room:'ป.6', periodsPerWeek:2},
+    {tid:12, subject:'อ.เพิ่ม', room:'ป.6', periodsPerWeek:1},
+
+    {tid:5, subject:'คอม', room:'อ.2/1', periodsPerWeek:1},
+    {tid:5, subject:'คอม', room:'อ.2/2', periodsPerWeek:1},
+    {tid:5, subject:'คอม', room:'อ.3', periodsPerWeek:1}
+  ];
+
+// Safe storage
+const Store=(()=>{let m=null,h=false;try{localStorage.setItem('_t','1');localStorage.removeItem('_t');h=true;}catch(e){}return{get(){if(h)try{return localStorage.getItem('school_timetable_db');}catch(e){}return m;},set(v){if(h)try{localStorage.setItem('school_timetable_db',v);}catch(e){}m=v;}};})();
+function loadData(){
+  try {
+    const s = Store.get();
+    if (s) {
+      DB = JSON.parse(s);
+      recalcNextId();
+    }
+  } catch(e) {}
+  // Always restore full assignments (overwrite any incomplete cached version)
+  DB.assignments = FULL_ASSIGNMENTS.map(a => ({...a}));
+  if (!DB.activityPeriods || Object.keys(DB.activityPeriods).length === 0) {
+    DB.activityPeriods = {'จันทร์':[7,8],'อังคาร':[7],'พุธ':[7],'พฤหัสบดี':[7],'ศุกร์':[7]};
+  }
+  saveData();
+}
+function saveData(){try{Store.set(JSON.stringify(DB));}catch(e){}}
+function recalcNextId() {
+  nextId.teacher = Math.max(...DB.teachers.map(t=>t.id), 12) + 1;
+  nextId.subject = Math.max(...DB.subjects.map(s=>s.id), 16) + 1;
+  nextId.room = Math.max(...DB.rooms.map(r=>r.id), 10) + 1;
+}
+
+// ===================== NAV =====================
+const SECTION_TITLES = {
+  dashboard:'ภาพรวม', teachers:'ครูผู้สอน', subjects:'วิชา',
+  rooms:'ห้องเรียน', timetable:'ตารางสอน (รายครู)', roomview:'ตารางห้องเรียน', conflicts:'ตรวจชนซ้อน',
+  freeperiods:'คาบว่างครูทั้งโรงเรียน', autoschedule:'จัดตารางอัตโนมัติ',
+  timesettings:'⏰ ตั้งค่าเวลาคาบ'
+};
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+  });
+  document.getElementById('topbar-title').textContent = SECTION_TITLES[id]||id;
+  if (id==='dashboard') renderDashboard();
+  if (id==='teachers') renderTeachers();
+  if (id==='subjects') renderSubjects();
+  if (id==='rooms') renderRooms();
+  if (id==='timetable') { populateTtSelect(); renderTimetable(); }
+  if (id==='roomview') { populateRvSelect(); renderRoomView(); }
+  if (id==='conflicts') checkConflicts();
+  if (id==='freeperiods') renderFreePeriods();
+  if (id==='autoschedule') initAutoSchedule();
+  if (id==='timesettings') initTimeSettings();
+}
+
+// ===================== DASHBOARD =====================
+function renderDashboard() {
+  const totalSlots = Object.values(DB.slots).reduce((a,t)=>a+Object.values(t).reduce((b,d)=>b+Object.keys(d).length,0),0);
+  const conflicts = findConflicts();
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="label">ครูทั้งหมด</div><div class="value">${DB.teachers.length}</div><div class="sub">คน</div></div>
+    <div class="stat-card accent"><div class="label">วิชาทั้งหมด</div><div class="value">${DB.subjects.length}</div><div class="sub">วิชา</div></div>
+    <div class="stat-card success"><div class="label">ห้องเรียน</div><div class="value">${DB.rooms.length}</div><div class="sub">ห้อง</div></div>
+    <div class="stat-card ${conflicts.length>0?'danger':'success'}"><div class="label">การชนซ้อน</div><div class="value">${conflicts.length}</div><div class="sub">${conflicts.length>0?'รายการ ⚠️':'ไม่มี ✓'}</div></div>
+  `;
+
+  // รายชื่อครูพร้อมสอน/กิจกรรม/รวม
+  document.getElementById('dash-teachers').innerHTML = DB.teachers.map(t=>{
+    const split = countTeacherSlotsSplit(t.id);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);gap:6px">
+      <span style="font-weight:600;min-width:60px">${t.nickname}</span>
+      <span style="color:var(--text-muted);font-size:12px;flex:1">${t.name.split(' ')[0]}</span>
+      <span style="display:flex;align-items:center;gap:4px">
+        <span title="คาบสอน" class="badge badge-green" style="font-size:11px;min-width:26px;text-align:center">${split.teaching}</span>
+        <span style="color:var(--text-muted);font-size:10px">+</span>
+        <span title="คาบกิจกรรม" class="badge badge-yellow" style="font-size:11px;min-width:26px;text-align:center">${split.activity}</span>
+        <span style="color:var(--text-muted);font-size:10px">=</span>
+        <span title="รวมทั้งหมด" style="font-weight:700;font-size:12px;color:var(--primary);min-width:24px;text-align:right">${split.total}</span>
+      </span>
+    </div>`;
+  }).join('')
+  + `<div style="display:flex;justify-content:flex-end;gap:10px;padding-top:8px;font-size:11px;color:var(--text-muted)">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#4ade80;margin-right:3px"></span>สอน</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#fcd34d;margin-right:3px"></span>กิจกรรม</span>
+      <span style="color:var(--primary);font-weight:600">= รวม</span>
+    </div>`;
+
+  // Bar chart แบบ stacked (สอน + กิจกรรม)
+  const max = Math.max(...DB.teachers.map(t=>countTeacherSlotsSplit(t.id).total), 1);
+  document.getElementById('dash-chart').innerHTML = DB.teachers.map(t=>{
+    const split = countTeacherSlotsSplit(t.id);
+    const pctTeach  = Math.round(split.teaching / max * 100);
+    const pctAct    = Math.round(split.activity  / max * 100);
+    return `<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;align-items:center">
+        <span style="font-weight:500">${t.nickname}</span>
+        <span style="display:flex;gap:6px;font-size:11px">
+          <span style="color:#15803d">${split.teaching} สอน</span>
+          <span style="color:#92400e">+${split.activity} กิจกรรม</span>
+          <span style="font-weight:700;color:var(--primary)">= ${split.total}</span>
+        </span>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:9px;overflow:hidden;display:flex">
+        <div style="background:#4ade80;height:100%;width:${pctTeach}%;transition:width 0.3s" title="สอน ${split.teaching} คาบ"></div>
+        <div style="background:#fcd34d;height:100%;width:${pctAct}%;transition:width 0.3s" title="กิจกรรม ${split.activity} คาบ"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function countTeacherSlots(tid) {
+  const t = DB.slots[tid];
+  if (!t) return 0;
+  return Object.values(t).reduce((a,d)=>a+Object.keys(d).length,0);
+}
+
+// รายชื่อ subject ที่ถือว่าเป็นกิจกรรม (ไม่ใช่วิชาสอนปกติ)
+var ACTIVITY_SUBJECT_NAMES = new Set([
+  'ชุมนุม','ลูกเสือ','จริยธรรม','แนะแนว','สอนเสริม',
+  'กพด','กพด.','PLC','กิจกรรม กพด.','กิจกรรม PLC','อ่านออก พิเศษ',
+  'ชุมนุม ','ลูกเสือ ','จริยธรรม ','แนะแนว ' // trim safety
+]);
+function isActivitySlot(pidStr, subject) {
+  const subj = (subject || '').trim();
+  if (!subj) return false;
+  // ชื่อวิชาตรงกับรายการกิจกรรม
+  if (ACTIVITY_SUBJECT_NAMES.has(subj)) return true;
+  // ขึ้นต้นด้วย "กิจกรรม"
+  if (subj.startsWith('กิจกรรม')) return true;
+  // period 7+ ถือเป็นกิจกรรมเสมอ
+  if (parseInt(pidStr) >= 7) return true;
+  return false;
+}
+
+function countTeacherSlotsSplit(tid) {
+  const t = DB.slots[tid];
+  if (!t) return {teaching:0, activity:0, total:0};
+  let teaching = 0, activity = 0;
+  Object.values(t).forEach(daySlots => {
+    Object.entries(daySlots).forEach(([pidStr, s]) => {
+      if (isActivitySlot(pidStr, s && s.subject)) activity++;
+      else teaching++;
+    });
+  });
+  return {teaching, activity, total: teaching + activity};
+}
+
+// ===================== TEACHERS =====================
+function getTeacherColor(tid){
+  // deterministic palette per teacher id
+  const colors = ['#ef4444','#f97316','#f59e0b','#eab308','#84cc16','#10b981','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#ec4899','#db2777','#fb7185'];
+  return colors[tid % colors.length] || '#94a3b8';
+}
+
+function getContrastColor(hex){
+  // returns '#fff' or '#111' based on luminance for readability
+  if(!hex) return 'var(--text)';
+  const c = hex.replace('#','');
+  const r = parseInt(c.substring(0,2),16)/255;
+  const g = parseInt(c.substring(2,4),16)/255;
+  const b = parseInt(c.substring(4,6),16)/255;
+  const lum = 0.2126*r + 0.7152*g + 0.0722*b;
+  return lum > 0.6 ? '#111' : '#fff';
+}
+
+function getTeacherSubjectCounts(tid){
+  const res = {};
+  const slots = DB.slots[tid]||{};
+  Object.values(slots).forEach(day=>{ Object.values(day).forEach(s=>{ if(s&&s.subject){ res[s.subject]=(res[s.subject]||0)+1; }}); });
+  return Object.entries(res).map(([subject,count])=>({subject,count}));
+}
+
+function renderTeachers() {
+  document.getElementById('teacher-tbody').innerHTML = DB.teachers.map((t,i)=>{
+    const split = countTeacherSlotsSplit(t.id);
+
+    // แยก subjects ตาม isActivitySlot
+    const teachRes = {}, actRes = {};
+    const slots = DB.slots[t.id] || {};
+    Object.values(slots).forEach(daySlots => {
+      Object.entries(daySlots).forEach(([pidStr, s]) => {
+        if (!s || !s.subject) return;
+        const subj = s.subject;
+        if (isActivitySlot(pidStr, subj)) {
+          actRes[subj] = (actRes[subj] || 0) + 1;
+        } else {
+          teachRes[subj] = (teachRes[subj] || 0) + 1;
+        }
+      });
+    });
+
+    const teachEntries = Object.entries(teachRes);
+    const teachTags = teachEntries.slice(0,6)
+      .map(([s,c])=>`<span class="tag" style="background:#f1f5f9;color:var(--text-muted)">${s} ${c}</span>`).join('');
+    const moreTeach = teachEntries.length > 6
+      ? `<span class="tag badge-gray">+${teachEntries.length-6}</span>` : '';
+    const actTags = Object.entries(actRes)
+      .map(([s,c])=>`<span class="tag" style="background:#fef3c7;color:#92400e">${s} ${c}</span>`).join('');
+    const divider = actTags ? `<span style="color:var(--border);margin:0 3px">|</span>` : '';
+
+    return `<tr>
+      <td style="color:var(--text-muted)">${i+1}</td>
+      <td><strong>${t.name}</strong></td>
+      <td><span class="badge badge-blue">${t.nickname}</span></td>
+      <td style="text-align:center">
+        <span class="badge badge-green" style="font-size:13px;padding:4px 10px">${split.teaching}</span>
+      </td>
+      <td style="text-align:center">
+        ${split.activity > 0
+          ? `<span class="badge badge-yellow" style="font-size:13px;padding:4px 10px">${split.activity}</span>`
+          : `<span style="color:var(--text-muted);font-size:11px">—</span>`
+        }
+      </td>
+      <td style="text-align:center">
+        <span style="font-weight:700;font-size:14px;color:var(--primary)">${split.total}</span>
+      </td>
+      <td>${teachTags}${moreTeach}${divider}${actTags}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-outline btn-sm" onclick="editTeacher(${t.id})">✏️</button>
+        <button class="btn btn-outline btn-sm" onclick="showSection('timetable');setTimeout(()=>{document.getElementById('tt-teacher-select').value=${t.id};renderTimetable()},100)">📅</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTeacher(${t.id})">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const thead = document.querySelector('#teacher-table thead tr');
+  if (thead) {
+    thead.innerHTML = '<th>#</th><th>ชื่อ-นามสกุล</th><th>ชื่อเล่น</th><th style="text-align:center">คาบสอน/สัปดาห์</th><th style="text-align:center">กิจกรรม/สัปดาห์</th><th style="text-align:center">รวม</th><th>วิชาที่สอน <span style="color:#92400e;font-weight:400;font-size:11px">| กิจกรรม</span></th><th>จัดการ</th>';
+  }
+  populateDeleteTeacherSelect();
+}
+
+function getTeacherSubjects(tid) {
+  const slots = DB.slots[tid];
+  if (!slots) return [];
+  const set = new Set();
+  Object.values(slots).forEach(d=>Object.values(d).forEach(s=>{ if(s.subject) set.add(s.subject); }));
+  return [...set];
+}
+
+function openAddTeacher() {
+  openModal('เพิ่มครูใหม่', `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>ชื่อ-นามสกุล *</label><input id="f-name" placeholder="เช่น สมศรี ใจดี"></div>
+      <div class="form-group"><label>ชื่อเล่น *</label><input id="f-nick" placeholder="เช่น ครูแดง"></div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:'saveTeacher()'},
+  ]);
+}
+
+function saveTeacher(id) {
+  const name = document.getElementById('f-name').trim();
+  const nick = document.getElementById('f-nick').trim();
+  if (!name||!nick) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+  if (id) {
+    const t = DB.teachers.find(x=>x.id===id);
+    t.name = name; t.nickname = nick;
+  } else {
+    DB.teachers.push({id: nextId.teacher++, name, nickname: nick});
+  }
+  saveData(); closeModal(); renderTeachers();
+}
+
+function editTeacher(id) {
+  const t = DB.teachers.find(x=>x.id===id);
+  openModal('แก้ไขข้อมูลครู', `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>ชื่อ-นามสกุล *</label><input id="f-name" value="${t.name}"></div>
+      <div class="form-group"><label>ชื่อเล่น *</label><input id="f-nick" value="${t.nickname}"></div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:`saveTeacher(${id})`},
+  ]);
+}
+
+function deleteTeacher(id) {
+  if (!confirm('ยืนยันการลบครูท่านนี้? ตารางสอนของครูจะถูกลบด้วย')) return;
+  DB.teachers = DB.teachers.filter(t=>t.id!==id);
+  delete DB.slots[id];
+  saveData(); renderTeachers();
+}
+
+// ล้างคาบของครู (ไม่ลบข้อมูลครู)
+function clearTeacherSlots(tid) {
+  if (!DB.slots[tid]) return 0;
+  const cnt = Object.values(DB.slots[tid]).reduce((a,d)=>a+Object.keys(d).length,0);
+  DB.slots[tid] = {};
+  return cnt;
+}
+
+function populateDeleteTeacherSelect() {
+  const sel = document.getElementById('delete-teacher-select');
+  if (!sel) return;
+  // add option to select all teachers
+  sel.innerHTML = '<option value="">-- เลือกครู --</option><option value="all">ครูทั้งหมด</option>' + DB.teachers.map(t=>`<option value="${t.id}">${t.nickname} — ${t.name.split(' ')[0]}</option>`).join('');
+}
+
+function clearTeacherSlotsFromUI() {
+  const sel = document.getElementById('delete-teacher-select');
+  if (!sel) return alert('ไม่พบตัวเลือกครู');
+  const tid = parseInt(sel.value);
+  if (!tid) { alert('กรุณาเลือกครูที่จะลบคาบ'); return; }
+  const teacher = DB.teachers.find(t=>t.id===tid);
+  const cnt = countTeacherSlots(tid);
+  if (!confirm(`ลบคาบสอนทั้งหมดของ ${teacher.nickname} (${teacher.name}) จำนวน ${cnt} คาบ?\nการกระทำนี้ไม่สามารถย้อนกลับ`)) return;
+  clearTeacherSlots(tid);
+  saveData(); renderTimetable(); renderTeachers();
+  showToast(`ลบคาบของ ${teacher.nickname} จำนวน ${cnt} คาบ`);
+}
+
+// ===================== SUBJECTS =====================
+function getSubjectTeacherCounts(code){
+  const res = {};
+  Object.entries(DB.slots).forEach(([tid, days])=>{
+    Object.values(days||{}).forEach(day=>{ Object.values(day||{}).forEach(slot=>{ if(slot && slot.subject===code && slot.room){ res[tid]=(res[tid]||0)+1; }}); });
+  });
+  return Object.entries(res).map(([tid,count])=>({tid:parseInt(tid),count}));
+}
+
+function renderSubjects() {
+  document.getElementById('subject-tbody').innerHTML = DB.subjects.map((s,i)=>{
+    const cnt = countSubjectSlots(s.code);
+    const teachers = getSubjectTeacherCounts(s.code);
+    const teacherHtml = teachers.map(t=>{
+      const name = (DB.teachers.find(x=>x.id===t.tid)||{}).nickname || t.tid;
+      const bg = getTeacherColor(t.tid);
+      const fg = getContrastColor(bg);
+      return `<span class="tag" style="background:${bg};color:${fg}">${name} ${t.count}</span>`;
+    }).join(' ');
+    return `<tr>
+      <td style="color:var(--text-muted)">${i+1}</td>
+      <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px">${s.code}</code></td>
+      <td>${s.name}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:${s.color};display:inline-block"></span>${s.color}</span></td>
+      <td><span class="badge badge-blue">${cnt} คาบ</span></td>
+      <td style="white-space:nowrap">${teacherHtml}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editSubject(${s.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSubject(${s.id})">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function countSubjectSlots(code) {
+  let cnt = 0;
+  Object.values(DB.slots).forEach(t=>Object.values(t).forEach(d=>Object.values(d).forEach(s=>{ if(s.subject===code) cnt++; })));
+  return cnt;
+}
+
+function openAddSubject() {
+  openModal('เพิ่มวิชาใหม่', `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>รหัสวิชา *</label><input id="f-code" placeholder="เช่น คณิต"></div>
+      <div class="form-group"><label>ชื่อวิชา *</label><input id="f-sname" placeholder="เช่น คณิตศาสตร์"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>สี</label><input id="f-color" type="color" value="#7c3aed"></div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:'saveSubject()'},
+  ]);
+}
+
+function saveSubject(id) {
+  const code = document.getElementById('f-code').trim();
+  const name = document.getElementById('f-sname').trim();
+  const color = document.getElementById('f-color').value;
+  if (!code||!name) { alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+  if (id) {
+    const s = DB.subjects.find(x=>x.id===id);
+    s.code=code; s.name=name; s.color=color;
+  } else {
+    DB.subjects.push({id: nextId.subject++, code, name, color});
+  }
+  saveData(); closeModal(); renderSubjects();
+}
+
+function editSubject(id) {
+  const s = DB.subjects.find(x=>x.id===id);
+  openModal('แก้ไขวิชา', `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>รหัสวิชา *</label><input id="f-code" value="${s.code}"></div>
+      <div class="form-group"><label>ชื่อวิชา *</label><input id="f-sname" value="${s.name}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>สี</label><input id="f-color" type="color" value="${s.color}"></div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:`saveSubject(${id})`},
+  ]);
+}
+
+function deleteSubject(id) {
+  if (!confirm('ยืนยันการลบวิชานี้?')) return;
+  DB.subjects = DB.subjects.filter(s=>s.id!==id);
+  saveData(); renderSubjects();
+}
+
+// ===================== ROOMS =====================
+function getRoomTeacherCounts(roomName){
+  const res = {};
+  Object.entries(DB.slots).forEach(([tid, days])=>{
+    Object.values(days||{}).forEach(day=>{ Object.values(day||{}).forEach(slot=>{ if(slot && slot.room===roomName){ res[tid]=(res[tid]||0)+1; }}); });
+  });
+  return Object.entries(res).map(([tid,count])=>({tid:parseInt(tid),count}));
+}
+
+function getRoomSubjectTeacherCounts(roomName){
+  const res = {};
+  Object.entries(DB.slots).forEach(([tid, days])=>{
+    Object.values(days||{}).forEach(day=>{
+      Object.values(day||{}).forEach(slot=>{
+        if(slot && slot.room===roomName){
+          const key = `${slot.subject}||${tid}`;
+          if(!res[key]) res[key] = {subject: slot.subject, tid: parseInt(tid), count: 0};
+          res[key].count++;
+        }
+      });
+    });
+  });
+  return Object.values(res);
+}
+
+function renderRooms() {
+  document.getElementById('room-tbody').innerHTML = DB.rooms.map((r,i)=>{
+    const entries = getRoomSubjectTeacherCounts(r.name);
+    const teacherHtml = entries.map(e=>{
+      const name=(DB.teachers.find(x=>x.id===e.tid)||{}).nickname||e.tid;
+      const bg = getTeacherColor(e.tid);
+      const fg = getContrastColor(bg);
+      const subj = e.subject || '';
+      return `<span class="tag" style="background:${bg};color:${fg}">${subj}: ${name} ${e.count}</span>`;
+    }).join(' ');
+    return `
+    <tr>
+      <td style="color:var(--text-muted)">${i+1}</td>
+      <td><strong>${r.name}</strong></td>
+      <td>${r.grade}</td>
+      <td>${r.students} คน</td>
+      <td style="white-space:normal;max-width:320px;word-wrap:break-word;overflow-wrap:break-word">${teacherHtml}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="editRoom(${r.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRoom(${r.id})">🗑️</button>
+      </td>
+    </tr>`}).join('');
+}
+
+function openAddRoom() {
+  openModal('เพิ่มห้องเรียนใหม่', `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>ชื่อห้อง *</label><input id="f-rname" placeholder="เช่น ป.4/2"></div>
+      <div class="form-group"><label>ระดับชั้น</label><input id="f-grade" placeholder="เช่น ป.4"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>จำนวนนักเรียน</label><input id="f-stu" type="number" placeholder="30" value="30"></div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:'saveRoom()'},
+  ]);
+}
+
+function saveRoom(id) {
+  const name = document.getElementById('f-rname').trim();
+  const grade = document.getElementById('f-grade').trim();
+  const students = parseInt(document.getElementById('f-stu').value)||0;
+  if (!name) { alert('กรุณากรอกชื่อห้อง'); return; }
+  if (id) {
+    const r = DB.rooms.find(x=>x.id===id);
+    r.name=name; r.grade=grade||name; r.students=students;
+  } else {
+    DB.rooms.push({id: nextId.room++, name, grade: grade||name, students});
+  }
+  saveData(); closeModal(); renderRooms();
+}
+
+function editRoom(id) {
+  const r = DB.rooms.find(x=>x.id===id);
+  openModal('แก้ไขห้องเรียน', `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>ชื่อห้อง *</label><input id="f-rname" value="${r.name}"></div>
+      <div class="form-group"><label>ระดับชั้น</label><input id="f-grade" value="${r.grade}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>จำนวนนักเรียน</label><input id="f-stu" type="number" value="${r.students}"></div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:`saveRoom(${id})`},
+  ]);
+}
+
+function deleteRoom(id) {
+  if (!confirm('ยืนยันการลบห้องเรียนนี้?')) return;
+  DB.rooms = DB.rooms.filter(r=>r.id!==id);
+  saveData(); renderRooms();
+}
+
+// ===================== TIMETABLE =====================
+function populateTtSelect() {
+  const sel = document.getElementById('tt-teacher-select');
+  sel.innerHTML = DB.teachers.map(t=>`<option value="${t.id}">${t.nickname} – ${t.name}</option>`).join('');
+}
+
+function renderTimetable() {
+  const tid = parseInt(document.getElementById('tt-teacher-select').value);
+  const tSlots = DB.slots[tid] || {};
+  const teacher = DB.teachers.find(t=>t.id===tid);
+  const cnt = countTeacherSlots(tid);
+  document.getElementById('tt-period-count').textContent = `${cnt} คาบ/สัปดาห์`;
+
+  const realPeriods = PERIODS.filter(p=>!p.isLunch);
+  let html = '<thead><tr><th>วัน / คาบ</th>';
+  PERIODS.forEach(p=> html += `<th>${p.label}</th>`);
+  html += '</tr></thead><tbody>';
+
+  DAYS.forEach(day=>{
+    html += `<tr><td class="day-label">${day}</td>`;
+    PERIODS.forEach(p=>{
+      if (p.isLunch) { html += `<td class="lunch">พักกลางวัน</td>`; return; }
+      // If school-wide activity at this time, show activity name
+      if ((activityPeriods[day]||[]).includes(p.id)) {
+        const key = `${day}|${p.id}`;
+        const name = activityNames[key] || 'กิจกรรมรวม';
+        html += `<td style="background:#fff7cc;color:#92400e;font-weight:700;text-align:center;padding:8px">
+          <div>${name}</div>
+          <div style="margin-top:6px;font-size:12px"><button class="btn btn-outline btn-sm" onclick="editActivity('${day}',${p.id})">แก้ชื่อ</button> <button class="btn btn-danger btn-sm" onclick="toggleAct('${day}',${p.id})">ลบ</button></div>
+        </td>`;
+        return;
+      }
+
+      const slot = (tSlots[day]||{})[p.id];
+      const color = slot ? getSlotColor(slot.subject) : '';
+      const isConflict = slot ? checkSlotConflict(tid, day, p.id) : false;
+      if (slot) {
+        html += `<td ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropSlot(event,${tid},'${day}',${p.id})"><div class="cell-slot slot-${color} ${isConflict?'conflict':''}"
+          draggable="true"
+          onclick="editSlot(${tid},'${day}',${p.id})"
+          ondragstart="dragStart(event,${tid},'${day}',${p.id})"
+          ondragend="dragEnd(event)"
+          title="คลิกแก้ไข | ลากเพื่อย้าย/สลับ"
+          data-tid="${tid}" data-day="${day}" data-pid="${p.id}">
+          <div class="subj">${slot.subject}</div>
+          <div class="room">${slot.room}</div>
+          <button class="del-btn" onclick="event.stopPropagation();deleteSlot(${tid},'${day}',${p.id})">×</button>
+        </div></td>`;
+      } else {
+        html += `<td data-tid="${tid}" data-day="${day}" data-pid="${p.id}"
+          ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropSlot(event,${tid},'${day}',${p.id})">
+          <button class="add-slot-btn" onclick="openAddSlot(${tid},'${day}',${p.id})">+</button></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tt-grid').innerHTML = html;
+
+  // Legend
+  const subjsUsed = new Set();
+  Object.values(tSlots).forEach(d=>Object.values(d).forEach(s=>{ if(s.subject) subjsUsed.add(getSlotColor(s.subject)); }));
+  const colorNames = {'คณิต':'คณิตศาสตร์','ไทย':'ภาษาไทย','อังกฤษ':'ภาษาอังกฤษ','วิทย':'วิทยาศาสตร์','สังคม':'สังคม','พลศึกษา':'พลศึกษา/สุขศึกษา','ศิลปะ':'ศิลปะ','การงาน':'การงาน','คอม':'คอมพิวเตอร์','other':'อื่นๆ'};
+  document.getElementById('legend').innerHTML = [...subjsUsed].map(c=>`
+    <div style="display:flex;align-items:center;gap:5px;font-size:12px">
+      <span style="width:12px;height:12px;border-radius:2px;background:var(--info-soft);border-left:3px solid" class="dot-${c}"></span>
+      ${colorNames[c]||c}
+    </div>`).join('');
+
+  // Missing assignments for this teacher
+  const assignmentsFor = (DB.assignments||[]).filter(a=>a.tid===tid);
+  let missingHtml = '';
+  if (assignmentsFor.length===0) {
+    missingHtml = `<div class="alert alert-info">ไม่มีภาระสอนที่ลงไว้สำหรับครูท่านนี้</div>`;
+  } else {
+    const missing = assignmentsFor.map(a=>{
+      // count in tSlots matching subject+room
+      let current = 0;
+      Object.values(tSlots).forEach(dayObj=>{ current += Object.values(dayObj).filter(s=>s.subject===a.subject && s.room===a.room).length; });
+      const rem = a.periodsPerWeek - current;
+      if (rem>0) return `${a.subject} ${a.room? a.room : ''} ขาดอีก ${rem} คาบ`;
+      return null;
+    }).filter(x=>x);
+    if (missing.length) {
+      missingHtml = `<div style="padding:8px;border-radius:6px;background:#fff7ed;border-left:4px solid #f59e0b">` + missing.map(m=>`<div style="margin-bottom:4px">${m}</div>`).join('') + `</div>`;
+    } else {
+      missingHtml = `<div class="alert alert-success">ครบภาระสอนแล้ว</div>`;
+    }
+  }
+  const missEl = document.getElementById('tt-missing'); if (missEl) missEl.innerHTML = missingHtml;
+}
+
+function checkSlotConflict(tid, day, pid) {
+  const slot = (DB.slots[tid]||{})[day]?.[pid];
+  if (!slot || !slot.room) return false;
+  for (const [otherId, otherSlots] of Object.entries(DB.slots)) {
+    if (parseInt(otherId)===tid) continue;
+    const otherSlot = (otherSlots[day]||{})[pid];
+    if (otherSlot && otherSlot.room === slot.room) return true;
+  }
+  return false;
+}
+
+function toggleCustomSubj(val) {
+  const row = document.getElementById('custom-subj-row');
+  if (row) row.style.display = val === '__custom__' ? '' : 'none';
+}
+
+function openAddSlot(tid, day, pid) {
+  const subjects = DB.subjects.map(s=>`<option value="${s.code}">${s.code} – ${s.name}</option>`).join('');
+  const rooms = DB.rooms.map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
+  openModal(`เพิ่มคาบสอน – ${day} คาบ ${pid}`, `
+    <div class="form-row">
+      <div class="form-group"><label>วิชา *</label>
+        <select id="f-subj" onchange="toggleCustomSubj(this.value)"><option value="">-- เลือกวิชา --</option>${subjects}
+        <option value="__custom__">พิมพ์เอง...</option></select>
+      </div>
+    </div>
+    <div class="form-row" id="custom-subj-row" style="display:none">
+      <div class="form-group"><label>ชื่อวิชา (พิมพ์เอง)</label><input id="f-subj-custom" placeholder="เช่น สอนเสริม"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>ห้องเรียน</label>
+        <select id="f-room"><option value="">-- ไม่ระบุ --</option>${rooms}</select>
+      </div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:`saveSlot(${tid},'${day}',${pid})`},
+  ]);
+}
+
+// Add slot by clicking on room view empty cell: choose teacher + subject
+function openAddSlotForRoom(roomName, day, pid){
+  const teacherOpts = DB.teachers.map(t=>`<option value="${t.id}">${t.nickname} – ${t.name}</option>`).join('');
+  const subjectOpts = DB.subjects.map(s=>`<option value="${s.code}">${s.code} – ${s.name}</option>`).join('') + `<option value="__custom__">พิมพ์เอง...</option>`;
+  openModal(`เพิ่มคาบให้ห้อง ${roomName} – ${day} คาบ ${pid}`, `
+    <div class="form-row cols-2">
+      <div class="form-group"><label>ครู *</label><select id="ar-tid">${teacherOpts}</select></div>
+      <div class="form-group"><label>คาบต่อสัปดาห์ (สำหรับบันทึก)</label><select id="ar-ppw">${[1,2,3,4,5].map(n=>`<option value="${n}">${n} คาบ</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>วิชา *</label>
+        <select id="ar-subj" onchange="toggleCustomSubj(this.value)"><option value="">-- เลือกวิชา --</option>${subjectOpts}</select>
+      </div>
+    </div>
+    <div class="form-row" id="custom-subj-row" style="display:none">
+      <div class="form-group"><label>ชื่อวิชา (พิมพ์เอง)</label><input id="f-subj-custom" placeholder="เช่น สอนเสริม"></div>
+    </div>
+  `, [
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'บันทึก', cls:'btn-primary', fn:`saveSlotForRoom('${roomName}','${day}',${pid})`}
+  ]);
+}
+
+function saveSlotForRoom(roomName, day, pid){
+  const tid = parseInt(document.getElementById('ar-tid').value);
+  let subj = document.getElementById('ar-subj').value;
+  if(subj==='__custom__') subj = document.getElementById('f-subj-custom').value.trim();
+  if(!tid || !subj){ alert('กรุณากรอกข้อมูลให้ครบ'); return; }
+  if(!DB.slots[tid]) DB.slots[tid]={};
+  if(!DB.slots[tid][day]) DB.slots[tid][day]={};
+  DB.slots[tid][day][pid] = { subject: subj, room: roomName, auto: false };
+  // Optionally, add assignment entry if not exists
+  const existsAssignment = (DB.assignments||[]).some(a=>a.tid===tid && a.subject===subj && a.room===roomName);
+  if(!existsAssignment){
+    DB.assignments = DB.assignments || [];
+    DB.assignments.push({ tid, subject: subj, room: roomName, periodsPerWeek: 1 });
+  }
+  saveData(); closeModal(); renderRoomView(); renderTimetable(); renderAssignmentList();
+}
+
+function editSlot(tid, day, pid) {
+  const slot = (DB.slots[tid]||{})[day]?.[pid];
+  if (!slot) return;
+  const period = PERIODS.find(p=>p.id===pid);
+  const teacher = DB.teachers.find(t=>t.id===tid);
+  const knownCode = DB.subjects.find(s=>s.code===slot.subject);
+  const isCustom = !knownCode;
+  const subjects = DB.subjects.map(s=>`<option value="${s.code}" ${s.code===slot.subject?'selected':''}>${s.code} – ${s.name}</option>`).join('');
+  const rooms = DB.rooms.map(r=>`<option value="${r.name}" ${r.name===slot.room?'selected':''}>${r.name}</option>`).join('');
+  const customDisplay = isCustom ? '' : 'none';
+  const selectVal = isCustom ? '__custom__' : slot.subject;
+  openModal(`แก้ไขคาบสอน – ${teacher.nickname} วัน${day} ${period?.label||pid}`, `
+    <div class="form-row">
+      <div class="form-group"><label>วิชา *</label>
+        <select id="f-subj" onchange="toggleCustomSubj(this.value)">
+          <option value="">-- เลือกวิชา --</option>${subjects}
+          <option value="__custom__" ${isCustom?'selected':''}>พิมพ์เอง...</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row" id="custom-subj-row" style="display:${customDisplay}">
+      <div class="form-group"><label>ชื่อวิชา (พิมพ์เอง)</label><input id="f-subj-custom" value="${slot.subject}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>ห้องเรียน</label>
+        <select id="f-room"><option value="">-- ไม่ระบุ --</option>${rooms}</select>
+      </div>
+    </div>
+  `, [
+    {label:'🗑️ ลบคาบนี้', cls:'btn-danger', fn:`deleteSlotAndClose(${tid},'${day}',${pid})`},
+    {label:'ยกเลิก', cls:'btn-outline', fn:'closeModal()'},
+    {label:'💾 บันทึก', cls:'btn-primary', fn:`saveSlot(${tid},'${day}',${pid})`},
+  ]);
+}
+
+function deleteSlotAndClose(tid, day, pid) {
+  delete DB.slots[tid][day][pid];
+  saveData(); closeModal(); renderTimetable();
+}
+
+function saveSlot(tid, day, pid) {
+  let subj = document.getElementById('f-subj').value;
+  if (subj === '__custom__') subj = document.getElementById('f-subj-custom').value.trim();
+  const room = document.getElementById('f-room').value;
+  if (!subj) { alert('กรุณาเลือกวิชา'); return; }
+  if (!DB.slots[tid]) DB.slots[tid] = {};
+  if (!DB.slots[tid][day]) DB.slots[tid][day] = {};
+  DB.slots[tid][day][pid] = {subject: subj, room};
+  saveData(); closeModal(); renderTimetable();
+}
+
+function deleteSlot(tid, day, pid) {
+  if (!confirm('ลบคาบนี้?')) return;
+  delete DB.slots[tid][day][pid];
+  saveData(); renderTimetable();
+}
+
+// ===================== ROOM VIEW (drag/drop + delete) =====================
+function populateRvSelect() {
+  const sel = document.getElementById('rv-room-select');
+  sel.innerHTML = DB.rooms.map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
+}
+
+let rvDragSrc = null;
+
+function renderRoomView() {
+  const roomName = document.getElementById('rv-room-select').value;
+  if (!roomName) return;
+  let html = '<thead><tr><th>วัน / คาบ</th>';
+  PERIODS.forEach(p => html += `<th style="text-align:center;min-width:90px;font-size:11px">${p.label}</th>`);
+  html += '</tr></thead><tbody>';
+
+  DAYS.forEach(day => {
+    html += `<tr><td class="day-label">${day}</td>`;
+    PERIODS.forEach(p => {
+      if (p.isLunch) { html += `<td class="lunch">พักกลางวัน</td>`; return; }
+
+      // If this is a school-wide activity, show activity name in room view
+      if ((activityPeriods[day]||[]).includes(p.id)) {
+        const key = `${day}|${p.id}`;
+        const name = activityNames[key] || 'กิจกรรมรวม';
+        html += `<td style="padding:8px;vertical-align:middle;text-align:center;background:#fff7cc;color:#92400e;font-weight:700">` +
+                `<div>${name}</div>` +
+                `</td>`;
+        return;
+      }
+
+      const found = [];
+      DB.teachers.forEach(t => {
+        const slot = (DB.slots[t.id]||{})[day]?.[p.id];
+        if (slot && (slot.room === roomName || slot.room === '')) found.push({teacher:t, slot});
+      });
+
+      if (found.length === 0) {
+        html += `<td onclick="openAddSlotForRoom('${roomName}','${day}',${p.id})" ondragover="rvOver(event)" ondragleave="rvLeave(event)" ondrop="rvDrop(event,'${roomName}','${day}',${p.id})" style="height:62px;vertical-align:middle;text-align:center;color:#cbd5e1;font-size:18px;cursor:pointer" title="ว่าง — คลิกเพื่อเพิ่มคาบ หรือลากมาวาง">·</td>`;
+      } else {
+        const allWide = found.every(x => x.slot.room === '');
+        if (allWide) {
+          // Group by subject — show each unique subject once (no teacher name)
+          const seen = new Map(); // subject → first teacher id (for delete/drag)
+          found.forEach(({teacher, slot}) => {
+            if (!seen.has(slot.subject)) seen.set(slot.subject, {teacher, slot});
+          });
+          html += `<td ondragover="rvOver(event)" ondragleave="rvLeave(event)" ondrop="rvDrop(event,'${roomName}','${day}',${p.id})" style="vertical-align:top;padding:2px">`;
+          seen.forEach(({teacher, slot}) => {
+            const color = getSlotColor(slot.subject);
+            html += `<div class="cell-slot slot-${color}" draggable="true"
+              ondragstart="rvDragStart(event,${teacher.id},'${day}',${p.id})"
+              ondragend="rvDragEnd(event)"
+              style="cursor:grab;position:relative;margin-bottom:2px"
+              title="${slot.subject} (กิจกรรมรวม)">
+              <div class="subj">${slot.subject}</div>
+              <button class="del-btn" onclick="event.stopPropagation();rvDeleteAllWide('${day}',${p.id})">×</button>
+            </div>`;
+          });
+          html += `</td>`;
+        } else if (found.length === 1) {
+          const {teacher, slot} = found[0];
+          const color = getSlotColor(slot.subject);
+          const isConflict = slot.room !== '' && checkSlotConflict(teacher.id, day, p.id);
+          html += `<td ondragover="rvOver(event)" ondragleave="rvLeave(event)" ondrop="rvDrop(event,'${roomName}','${day}',${p.id})" style="padding:2px;vertical-align:top">
+            <div class="cell-slot slot-${color} ${isConflict?'conflict':''}" draggable="true"
+              ondragstart="rvDragStart(event,${teacher.id},'${day}',${p.id})"
+              ondragend="rvDragEnd(event)"
+              style="cursor:grab;position:relative;height:56px;box-sizing:border-box"
+              title="ลาก = ย้าย/สลับ | คลิก = แก้ไข | × = ลบ">
+              <div class="subj">${slot.subject}</div>
+              <div class="room">${teacher.nickname}</div>
+              <button class="del-btn" onclick="event.stopPropagation();rvDeleteSlot(${teacher.id},'${day}',${p.id})">×</button>
+            </div>
+          </td>`;
+        } else {
+          // multiple → conflict
+          html += `<td style="padding:2px;vertical-align:top">`;
+          found.filter(x=>x.slot.room!=='').forEach(({teacher, slot}) => {
+            const color = getSlotColor(slot.subject);
+            html += `<div class="cell-slot conflict" draggable="true"
+              ondragstart="rvDragStart(event,${teacher.id},'${day}',${p.id})"
+              ondragend="rvDragEnd(event)"
+              style="cursor:grab;position:relative;margin-bottom:2px">
+              <div class="subj" style="font-size:10px">⚠️ ${slot.subject}</div>
+              <div class="room" style="font-size:9px">${teacher.nickname}</div>
+              <button class="del-btn" onclick="event.stopPropagation();rvDeleteSlot(${teacher.id},'${day}',${p.id})">×</button>
+            </div>`;
+          });
+          html += `</td>`;
+        }
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('rv-grid').innerHTML = html;
+
+  // Missing assignments for this room
+  const assignmentsForRoom = (DB.assignments||[]).filter(a=>a.room===roomName);
+  let missingHtml = '';
+  if (!assignmentsForRoom.length) {
+    missingHtml = '<div class="alert alert-info" style="margin-top:8px">ไม่มีภาระสอนลงไว้สำหรับห้องนี้</div>';
+  } else {
+    const missing = [];
+    assignmentsForRoom.forEach(a=>{
+      let placed = 0;
+      Object.entries(DB.slots).forEach(([tid, days])=>{
+        Object.entries(days||{}).forEach(([d, ds])=>{
+          Object.entries(ds||{}).forEach(([pid, slot])=>{
+            if (slot && slot.room === roomName && slot.subject === a.subject) placed++;
+          });
+        });
+      });
+      const rem = a.periodsPerWeek - placed;
+      if (rem>0) {
+        const t = DB.teachers.find(x=>x.id===a.tid);
+        missing.push(`${a.subject} ${roomName} ขาดอีก ${rem} คาบ (ครู ${t? t.nickname : a.tid})`);
+      }
+    });
+    if (missing.length) missingHtml = `<div style="margin-top:8px;padding:8px;border-radius:6px;background:#fff7ed;border-left:4px solid #f59e0b">` + missing.map(m=>`<div style="margin-bottom:4px">${m}</div>`).join('') + `</div>`;
+    else missingHtml = '<div class="alert alert-success" style="margin-top:8px">ครบภาระสอนสำหรับห้องนี้แล้ว</div>';
+  }
+  const missEl = document.getElementById('rv-missing'); if (missEl) missEl.innerHTML = missingHtml;
+}
+
+function rvDragStart(event, tid, day, pid) {
+  const slot = (DB.slots[tid]||{})[day]?.[pid];
+  if (!slot) return;
+  rvDragSrc = {tid, day, pid, slot:{...slot}};
+  event.dataTransfer.effectAllowed = 'move';
+  const ghost = document.createElement('div');
+  ghost.className = 'drag-ghost';
+  ghost.textContent = slot.subject + (slot.room ? ' · '+slot.room : ' · กิจกรรม');
+  document.body.appendChild(ghost);
+  event.dataTransfer.setDragImage(ghost, 60, 20);
+  setTimeout(() => { ghost.remove(); event.target.style.opacity = '0.4'; }, 0);
+}
+function rvDragEnd(event) {
+  event.target.style.opacity = '';
+  document.querySelectorAll('.drop-target,.drop-target-swap').forEach(el => el.classList.remove('drop-target','drop-target-swap'));
+  rvDragSrc = null;
+}
+function rvOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  const td = event.currentTarget;
+  td.classList.remove('drop-target','drop-target-swap');
+  if (!rvDragSrc) return;
+  const roomName = document.getElementById('rv-room-select').value;
+  // check if td has text·  (empty) or a slot
+  const hasSlot = td.querySelector('.cell-slot');
+  td.classList.add(hasSlot ? 'drop-target-swap' : 'drop-target');
+}
+function rvLeave(event) { event.currentTarget.classList.remove('drop-target','drop-target-swap'); }
+
+function rvDrop(event, roomName, toDay, toPid) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drop-target','drop-target-swap');
+  if (!rvDragSrc) return;
+  const {tid:fromTid, day:fromDay, pid:fromPid, slot:fromSlot} = rvDragSrc;
+  rvDragSrc = null;
+  if (fromDay===toDay && fromPid===toPid) return;
+
+  let toTeacher=null, toSlot=null;
+  DB.teachers.forEach(t => {
+    const s = (DB.slots[t.id]||{})[toDay]?.[toPid];
+    if (s && s.room===roomName) { toTeacher=t; toSlot={...s}; }
+  });
+
+  if (!DB.slots[fromTid]) DB.slots[fromTid]={};
+  if (!DB.slots[fromTid][fromDay]) DB.slots[fromTid][fromDay]={};
+
+  if (toTeacher && toSlot) {
+    if (toTeacher.id===fromTid) {
+      if (!DB.slots[fromTid][toDay]) DB.slots[fromTid][toDay]={};
+      DB.slots[fromTid][toDay][toPid] = fromSlot;
+      delete DB.slots[fromTid][fromDay][fromPid];
+      showToast(`ย้าย "${fromSlot.subject}" → ${toDay} คาบ ${toPid}`);
+    } else {
+      if (!DB.slots[toTeacher.id]) DB.slots[toTeacher.id]={};
+      if (!DB.slots[toTeacher.id][fromDay]) DB.slots[toTeacher.id][fromDay]={};
+      if (!DB.slots[fromTid][toDay]) DB.slots[fromTid][toDay]={};
+      DB.slots[fromTid][toDay][toPid] = fromSlot;
+      delete DB.slots[fromTid][fromDay][fromPid];
+      DB.slots[toTeacher.id][fromDay][fromPid] = toSlot;
+      delete DB.slots[toTeacher.id][toDay][toPid];
+      showToast(`สลับ "${fromSlot.subject}" ↔ "${toSlot.subject}" สำเร็จ`);
+    }
+  } else {
+    if (!DB.slots[fromTid][toDay]) DB.slots[fromTid][toDay]={};
+    DB.slots[fromTid][toDay][toPid] = fromSlot;
+    delete DB.slots[fromTid][fromDay][fromPid];
+    showToast(`ย้าย "${fromSlot.subject}" → ${toDay} คาบ ${toPid}`);
+  }
+  saveData(); renderRoomView();
+}
+
+function rvDeleteAllWide(day, pid) {
+  // Collect all teachers who have a wide-activity slot at this day+pid
+  const affected = DB.teachers.filter(t => {
+    const s = (DB.slots[t.id]||{})[day]?.[pid];
+    return s && s.room === '';
+  });
+  if (!affected.length) return;
+  const subjName = (DB.slots[affected[0].id]||{})[day]?.[pid]?.subject || 'กิจกรรม';
+  if (!confirm(`ลบ "${subjName}" วัน${day} คาบ ${pid} ออกจากครูทั้ง ${affected.length} คน?`)) return;
+  affected.forEach(t => { delete DB.slots[t.id][day][pid]; });
+  saveData(); renderRoomView();
+  showToast(`ลบ "${subjName}" สำเร็จ (${affected.length} คน)`);
+}
+
+function rvDeleteSlot(tid, day, pid) {
+  const slot = (DB.slots[tid]||{})[day]?.[pid];
+  if (!slot) return;
+  const teacher = DB.teachers.find(t=>t.id===tid);
+  if (!confirm(`ลบ "${slot.subject}" (${teacher?.nickname}) วัน${day} คาบ ${pid}?`)) return;
+  delete DB.slots[tid][day][pid];
+  saveData(); renderRoomView();
+  showToast('ลบคาบสำเร็จ');
+}
+
+// ===================== CONFLICTS =====================
+function findConflicts() {
+  const conflicts = [];
+  // Teacher double booking
+  DB.teachers.forEach(t=>{
+    const slots = DB.slots[t.id]||{};
+    DAYS.forEach(day=>{
+      PERIODS.filter(p=>!p.isLunch).forEach(p=>{
+        const slot = (slots[day]||{})[p.id];
+        if (!slot) return;
+        // Room conflict
+        if (slot.room) {
+          DB.teachers.forEach(t2=>{
+            if (t2.id <= t.id) return;
+            const slot2 = (DB.slots[t2.id]||{})[day]?.[p.id];
+            if (slot2 && slot2.room === slot.room) {
+              conflicts.push({type:'room', day, period: p.label, room: slot.room, teacher1: t, teacher2: t2, subj1: slot.subject, subj2: slot2.subject});
+            }
+          });
+        }
+      });
+    });
+  });
+  return conflicts;
+}
+
+function checkConflicts() {
+  const conflicts = findConflicts();
+  const body = document.getElementById('conflict-body');
+  if (conflicts.length === 0) {
+    body.innerHTML = `<div class="alert alert-success">✅ ไม่พบการชนซ้อนใดๆ ตารางสอนถูกต้อง!</div>`;
+  } else {
+    body.innerHTML = `<div class="alert alert-danger">⚠️ พบการชนซ้อน ${conflicts.length} รายการ</div>
+    <div class="conflict-list">` +
+    conflicts.map(c=>`<div class="conflict-item">
+      <strong>🏫 ห้อง ${c.room}</strong> วัน${c.day} คาบ ${c.period}<br>
+      ครู <strong>${c.teacher1.nickname}</strong> สอน "${c.subj1}" &amp; ครู <strong>${c.teacher2.nickname}</strong> สอน "${c.subj2}" ในเวลาเดียวกัน
+    </div>`).join('') + '</div>';
+  }
+}
+
+function renderFreePeriods() {
+  const realPeriods = PERIODS.filter(p => !p.isLunch);
+  const n = DB.teachers.length;
+
+  // ครู "ว่าง" ในคาบนั้น = ไม่มี slot หรือ slot นั้นเป็นกิจกรรม (ไม่ใช่วิชาสอน)
+  function isTeacherFree(tid, day, pid) {
+    const slot = (DB.slots[tid]||{})[day]?.[pid];
+    if (!slot) return true;  // ไม่มี slot = ว่าง
+    return isActivitySlot(String(pid), slot.subject); // เป็นกิจกรรม = ถือว่าว่าง
+  }
+
+  // Build grid: grid[day][pid] = array of free teacher nicknames
+  const grid = {};
+  DAYS.forEach(day => {
+    grid[day] = {};
+    realPeriods.forEach(p => {
+      grid[day][p.id] = DB.teachers
+        .filter(t => isTeacherFree(t.id, day, p.id))
+        .map(t => t.nickname);
+    });
+  });
+
+  function c(count) {
+    if (count === 0) return {bg:'#f8fafc',border:'#e2e8f0',pill:'#94a3b8',chip:'#e2e8f0',chipText:'#64748b'};
+    if (count <= 3)  return {bg:'#f0fdf4',border:'#86efac',pill:'#16a34a',chip:'#dcfce7',chipText:'#15803d'};
+    if (count <= 7)  return {bg:'#dcfce7',border:'#4ade80',pill:'#15803d',chip:'#bbf7d0',chipText:'#14532d'};
+    return               {bg:'#bbf7d0',border:'#22c55e',pill:'#14532d',chip:'#4ade80',chipText:'#052e16'};
+  }
+
+  const lunchPeriod = PERIODS.find(p => p.isLunch);
+  const allPeriods = PERIODS; // include lunch for column display
+
+  let html = `<table style="border-collapse:collapse;width:100%;font-size:13px;table-layout:fixed">
+    <colgroup><col style="width:72px">`;
+  allPeriods.forEach(() => html += `<col>`);
+  html += `</colgroup><thead><tr>
+    <th style="background:var(--primary);color:white;padding:10px 10px;text-align:center;border-right:2px solid rgba(255,255,255,0.15);position:sticky;left:0;z-index:2;font-size:11px">วัน</th>`;
+  allPeriods.forEach(p => {
+    if (p.isLunch) {
+      html += `<th style="background:#78350f;color:#fef3c7;padding:7px 6px;text-align:center;border-right:1px solid rgba(255,255,255,0.08);min-width:90px">
+        <div style="font-size:13px;margin-bottom:2px">🍽️</div>
+        <div style="font-size:10px;font-weight:600;opacity:.9">${p.label}</div>
+      </th>`;
+    } else {
+      html += `<th style="background:var(--primary);color:white;padding:7px 6px;text-align:center;border-right:1px solid rgba(255,255,255,0.08);min-width:110px">
+        <div style="font-size:9px;opacity:.6;letter-spacing:.04em">คาบ ${p.id}</div>
+        <div style="font-size:11px;font-weight:600;margin-top:1px">${p.label}</div>
+      </th>`;
+    }
+  });
+  html += `</tr></thead><tbody>`;
+
+  DAYS.forEach(day => {
+    html += `<tr>
+      <td style="background:var(--primary);color:white;padding:10px 8px;font-weight:700;font-size:13px;text-align:center;border-top:1px solid rgba(255,255,255,0.08);border-right:2px solid rgba(255,255,255,0.15);position:sticky;left:0;z-index:1;vertical-align:middle;white-space:nowrap">${day}</td>`;
+    allPeriods.forEach(p => {
+      if (p.isLunch) {
+        html += `<td style="background:#fffbeb;border:0 solid #fde68a;border-width:0 1px 1px 0;padding:0;vertical-align:middle;text-align:center">
+          <div style="padding:8px 4px;color:#92400e;font-size:12px;font-weight:600;line-height:1.4">
+            <div style="font-size:16px;margin-bottom:3px">😴</div>
+            พักกลางวัน
+          </div>
+        </td>`;
+        return;
+      }
+      const free = grid[day][p.id];
+      const cnt = free.length;
+      const s = c(cnt);
+      html += `<td style="background:${s.bg};border:0 solid ${s.border};border-width:0 1px 1px 0;padding:6px 7px;vertical-align:top">`;
+      if (cnt === 0) {
+        html += `<div style="text-align:center;padding:10px 0;color:${s.pill};font-size:12px;opacity:.5">ครูสอนครบ</div>`;
+      } else {
+        html += `<div style="margin-bottom:5px">
+          <span style="background:${s.pill};color:white;border-radius:20px;padding:1px 9px;font-size:10px;font-weight:700;line-height:1.7">ว่าง ${cnt} คน</span>
+        </div><div style="display:flex;flex-wrap:wrap;gap:3px">`;
+        free.forEach(nick => {
+          html += `<span style="background:${s.chip};color:${s.chipText};border-radius:20px;padding:1px 8px;font-size:11px;font-weight:600;white-space:nowrap;line-height:1.7">${nick}</span>`;
+        });
+        html += `</div>`;
+      }
+      html += `</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>`;
+
+  // Summary footer
+  let totalFree = 0;
+  DAYS.forEach(day => realPeriods.forEach(p => { totalFree += grid[day][p.id].length; }));
+  const totalPossible = n * DAYS.length * realPeriods.length;
+  const usedPct = totalPossible > 0 ? Math.round((totalPossible - totalFree) / totalPossible * 100) : 0;
+
+  html += `<div style="display:flex;align-items:center;gap:16px;padding:10px 14px;background:#f8fafc;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);flex-wrap:wrap">
+    <span>👨‍🏫 ครู <strong style="color:var(--primary)">${n} คน</strong></span>
+    <span>📊 ใช้ตาราง <strong style="color:var(--primary-light)">${usedPct}%</strong></span>
+    <span style="margin-left:auto;font-size:11px">💡 เขียวเข้ม = ครูว่างมาก เหมาะจัดกิจกรรม</span>
+  </div>`;
+
+  document.getElementById('free-periods-grid').innerHTML = html;
+}
+
+// ===================== SEARCH =====================
+function doSearch(q) {
+  if (!q) return;
+  q = q.toLowerCase();
+}
+
+// ===================== EXPORT/IMPORT =====================
+function exportData() {
+  const data = JSON.stringify(DB, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'timetable_backup.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed.teachers || !parsed.slots) { alert('ไฟล์ไม่ถูกต้อง'); return; }
+        DB = parsed; recalcNextId(); saveData();
+        showSection('dashboard');
+        alert('โหลดข้อมูลสำเร็จ!');
+      } catch(e) { alert('ไฟล์ไม่ถูกต้อง'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function saveLocal(){
+  try{ saveData(); alert('บันทึกลง localStorage เรียบร้อย'); }catch(e){ alert('บันทึกไม่สำเร็จ'); }
+}
+
+function clearLocalAndLoadBaseline(){
+  if (!confirm('ยืนยัน: ล้าง localStorage และโหลด baseline ที่ฝังไว้ในหน้า? ข้อมูลปัจจุบันจะหาย')) return;
+  try{ localStorage.removeItem('school_timetable_db'); }catch(e){}
+  alert('ล้าง localStorage เรียบร้อย กำลังโหลด baseline...');
+  location.reload();
+}
+
+// ============== Printable export ==============
+function openPrintWindow(html, title){
+  const w = window.open('', '_blank');
+  const doc = w.document;
+  doc.open();
+  const out = `<!doctype html><html><head><meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${title||'ตารางสอน'}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;padding:16px;color:#1a202c}
+    .sheet{max-width:960px;margin:0 auto}
+    .header-box{background:linear-gradient(135deg,#1a3a5c 0%,#2563a8 100%);color:white;border-radius:12px;padding:18px 24px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
+    .header-box .icon{font-size:36px;opacity:.9}
+    .header-box h1{font-size:20px;font-weight:700;margin-bottom:3px}
+    .header-box .sub{font-size:13px;opacity:.75}
+    .timetable{border-collapse:collapse;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1);margin-bottom:20px}
+    .timetable thead th{padding:10px 8px;font-size:12px;font-weight:700;text-align:center;letter-spacing:.03em}
+    .timetable .th-day{background:#1a3a5c;color:white;min-width:72px}
+    .timetable .th-period{background:#2563a8;color:white;min-width:100px}
+    .timetable .th-lunch{background:#78350f;color:#fef3c7;min-width:90px}
+    .timetable tbody tr:nth-child(odd) td.td-day{background:#1e4976}
+    .timetable tbody tr:nth-child(even) td.td-day{background:#1a3a5c}
+    .timetable .td-day{color:white;font-weight:700;font-size:13px;text-align:center;padding:10px 6px;vertical-align:middle}
+    .timetable td{border:1px solid #e2e8f0;padding:7px 6px;text-align:center;vertical-align:middle;background:white;font-size:13px}
+    .timetable .td-lunch{background:#fffbeb;color:#92400e;font-weight:600;font-size:12px}
+    .timetable .td-empty{background:#f8fafc;color:#cbd5e1}
+    .cell-subj{font-weight:700;font-size:13px;line-height:1.3;margin-bottom:3px}
+    .cell-meta{font-size:11px;color:#64748b;line-height:1.3}
+    /* Subject colors */
+    .td-teach{background:#eff6ff}
+    .td-teach .cell-subj{color:#1d4ed8}
+    /* Activity colors */
+    .td-act-ชุมนุม{background:#fdf4ff}.td-act-ชุมนุม .cell-subj{color:#7e22ce}
+    .td-act-ลูกเสือ{background:#fff7ed}.td-act-ลูกเสือ .cell-subj{color:#c2410c}
+    .td-act-จริยธรรม{background:#f0fdf4}.td-act-จริยธรรม .cell-subj{color:#15803d}
+    .td-act-แนะแนว{background:#eff6ff}.td-act-แนะแนว .cell-subj{color:#1d4ed8}
+    .td-act-สอนเสริม{background:#fefce8}.td-act-สอนเสริม .cell-subj{color:#a16207}
+    .td-act{background:#fef3c7}.td-act .cell-subj{color:#92400e}
+    .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-size:12px}
+    .legend-item{display:flex;align-items:center;gap:5px}
+    .legend-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+    .summary-box{background:white;border-radius:10px;padding:14px 18px;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap}
+    .summary-item{text-align:center}
+    .summary-item .num{font-size:24px;font-weight:800;color:#1a3a5c}
+    .summary-item .lbl{font-size:11px;color:#64748b;margin-top:2px}
+    @media print{
+      body{background:white;padding:0}
+      .sheet{max-width:100%}
+      .timetable{box-shadow:none}
+      .header-box{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .timetable td,.timetable th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    }
+  </style></head><body><div class="sheet">${html}</div></body></html>`;
+  doc.write(out);
+  doc.close();
+}
+
+function getActClass(subject) {
+  const s = (subject||'').trim();
+  const map = {'ชุมนุม':'ชุมนุม','ลูกเสือ':'ลูกเสือ','จริยธรรม':'จริยธรรม','แนะแนว':'แนะแนว','สอนเสริม':'สอนเสริม'};
+  return map[s] ? `td-act-${map[s]}` : 'td-act';
+}
+
+function buildTeacherPrintable(tid){
+  const teacher = DB.teachers.find(t=>t.id===tid);
+  const tname = teacher ? teacher.name : tid;
+  const tnick = teacher ? teacher.nickname : '';
+  const split = countTeacherSlotsSplit(tid);
+
+  let html = `
+  <div class="header-box">
+    <div class="icon">👩‍🏫</div>
+    <div>
+      <h1>ตารางสอน${tnick ? ' ' + tnick : ''}</h1>
+      <div class="sub">${tname}${tnick ? ' · ' + tnick : ''} &nbsp;|&nbsp; ภาคเรียนที่ 1 / 2569</div>
+    </div>
+  </div>
+  <div class="summary-box">
+    <div class="summary-item"><div class="num" style="color:#15803d">${split.teaching}</div><div class="lbl">คาบสอน/สัปดาห์</div></div>
+    <div class="summary-item"><div class="num" style="color:#d97706">${split.activity}</div><div class="lbl">คาบกิจกรรม/สัปดาห์</div></div>
+    <div class="summary-item"><div class="num">${split.total}</div><div class="lbl">รวมทั้งหมด</div></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#eff6ff;border:1px solid #93c5fd"></div>วิชาสอน</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #fcd34d"></div>กิจกรรม</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fffbeb;border:1px solid #fde68a"></div>พักกลางวัน</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f8fafc;border:1px solid #e2e8f0"></div>ว่าง</div>
+  </div>
+  <table class="timetable"><thead><tr>
+    <th class="th-day">วัน</th>`;
+  PERIODS.forEach(p => {
+    if (p.isLunch) html += `<th class="th-lunch">🍽️<br>${p.label}</th>`;
+    else html += `<th class="th-period">คาบ ${p.id}<br><span style="font-weight:400;opacity:.8;font-size:10px">${p.label}</span></th>`;
+  });
+  html += `</tr></thead><tbody>`;
+  DAYS.forEach(day => {
+    html += `<tr><td class="td-day">${day}</td>`;
+    PERIODS.forEach(p => {
+      if (p.isLunch){ html += `<td class="td-lunch">😴<br>พักกลางวัน</td>`; return; }
+      const slot = (DB.slots[tid]||{})[day]?.[p.id];
+      if (!slot) { html += `<td class="td-empty">—</td>`; return; }
+      if (isActivitySlot(String(p.id), slot.subject)) {
+        const cls = getActClass(slot.subject);
+        html += `<td class="${cls}"><div class="cell-subj">${slot.subject}</div></td>`;
+      } else {
+        html += `<td class="td-teach"><div class="cell-subj">${slot.subject}</div><div class="cell-meta">${slot.room||''}</div></td>`;
+      }
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function buildRoomPrintable(roomName){
+  // หาวิชาหลักของห้อง (homeroom teacher)
+  let html = `
+  <div class="header-box">
+    <div class="icon">🏫</div>
+    <div>
+      <h1>ตารางเรียน ห้อง ${roomName}</h1>
+      <div class="sub">ภาคเรียนที่ 1 / 2569</div>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#eff6ff;border:1px solid #93c5fd"></div>วิชาเรียน</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #fcd34d"></div>กิจกรรม</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fffbeb;border:1px solid #fde68a"></div>พักกลางวัน</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f8fafc;border:1px solid #e2e8f0"></div>ว่าง</div>
+  </div>
+  <table class="timetable"><thead><tr>
+    <th class="th-day">วัน</th>`;
+  PERIODS.forEach(p => {
+    if (p.isLunch) html += `<th class="th-lunch">🍽️<br>${p.label}</th>`;
+    else html += `<th class="th-period">คาบ ${p.id}<br><span style="font-weight:400;opacity:.8;font-size:10px">${p.label}</span></th>`;
+  });
+  html += `</tr></thead><tbody>`;
+  DAYS.forEach(day => {
+    html += `<tr><td class="td-day">${day}</td>`;
+    PERIODS.forEach(p => {
+      if (p.isLunch){ html += `<td class="td-lunch">😴<br>พักกลางวัน</td>`; return; }
+      // หาครูที่สอนในห้องนี้คาบนี้
+      let found = null;
+      let actFound = null;
+      DB.teachers.forEach(t => {
+        const s = (DB.slots[t.id]||{})[day]?.[p.id];
+        if (!s) return;
+        if (isActivitySlot(String(p.id), s.subject)) {
+          // กิจกรรม — เก็บไว้ก่อน (แสดงทุกห้อง ไม่เช็ค room)
+          if (!actFound) actFound = {t, s};
+        } else if (s.room === roomName) {
+          found = {t, s};
+        }
+      });
+      if (found) {
+        // วิชาสอนปกติ
+        html += `<td class="td-teach"><div class="cell-subj">${found.s.subject}</div><div class="cell-meta">${found.t.nickname}</div></td>`;
+      } else if (actFound) {
+        // คาบกิจกรรม — แสดงทุกห้อง
+        const cls = getActClass(actFound.s.subject);
+        html += `<td class="${cls}"><div class="cell-subj">${actFound.s.subject}</div></td>`;
+      } else {
+        html += `<td class="td-empty">—</td>`;
+      }
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  return html;
+}
+
+function generatePrintableForCurrent(){
+  // Build modal content
+  const teacherOptions = DB.teachers.map(t =>
+    `<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+      <input type="checkbox" class="print-teacher-cb" value="${t.id}" style="width:16px;height:16px;accent-color:#2563a8">
+      <span style="font-weight:600;color:#1a3a5c;min-width:60px">${t.nickname}</span>
+      <span style="color:#64748b;font-size:13px">${t.name}</span>
+    </label>`
+  ).join('');
+
+  const roomOptions = DB.rooms.map(r =>
+    `<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+      <input type="checkbox" class="print-room-cb" value="${r.name}" style="width:16px;height:16px;accent-color:#059669">
+      <span style="font-weight:600;color:#065f46">${r.name}</span>
+    </label>`
+  ).join('');
+
+  const body = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <!-- ครู -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-weight:700;color:#1a3a5c;font-size:14px">👩‍🏫 ตารางครู</div>
+          <div style="display:flex;gap:6px">
+            <button onclick="document.querySelectorAll('.print-teacher-cb').forEach(c=>c.checked=true)" style="font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid #cbd5e1;cursor:pointer;background:white">เลือกทั้งหมด</button>
+            <button onclick="document.querySelectorAll('.print-teacher-cb').forEach(c=>c.checked=false)" style="font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid #cbd5e1;cursor:pointer;background:white">ล้าง</button>
+          </div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:8px;max-height:300px;overflow-y:auto;padding:4px">
+          ${teacherOptions}
+        </div>
+      </div>
+      <!-- ห้อง -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-weight:700;color:#065f46;font-size:14px">🏫 ตารางห้องเรียน</div>
+          <div style="display:flex;gap:6px">
+            <button onclick="document.querySelectorAll('.print-room-cb').forEach(c=>c.checked=true)" style="font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid #cbd5e1;cursor:pointer;background:white">เลือกทั้งหมด</button>
+            <button onclick="document.querySelectorAll('.print-room-cb').forEach(c=>c.checked=false)" style="font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid #cbd5e1;cursor:pointer;background:white">ล้าง</button>
+          </div>
+        </div>
+        <div style="border:1px solid #e2e8f0;border-radius:8px;max-height:300px;overflow-y:auto;padding:4px">
+          ${roomOptions}
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:10px 14px;background:#f8fafc;border-radius:8px;font-size:12px;color:#64748b">
+      💡 เลือกได้หลายรายการ — จะปริ้นรวมในหน้าเดียวกัน แต่ละตารางแยกหน้า
+    </div>`;
+
+  openModal('🖨️ เลือกรายการที่จะปริ้น', body, [
+    { label: '🖨️ สร้างไฟล์ปริ้น', cls: 'btn-primary', fn: 'doPrint()' },
+    { label: 'ยกเลิก', cls: 'btn-outline', fn: 'closeModal()' }
+  ]);
+
+  // Pre-select based on current view
+  const active = document.querySelector('.section.active');
+  if (active) {
+    if (active.id === 'section-timetable') {
+      const tid = parseInt(document.getElementById('tt-teacher-select').value);
+      const cb = document.querySelector(`.print-teacher-cb[value="${tid}"]`);
+      if (cb) cb.checked = true;
+    } else if (active.id === 'section-roomview') {
+      const room = document.getElementById('rv-room-select').value;
+      const cb = document.querySelector(`.print-room-cb[value="${room}"]`);
+      if (cb) cb.checked = true;
+    }
+  }
+}
+
+function doPrint(){
+  const teacherIds = [...document.querySelectorAll('.print-teacher-cb:checked')].map(c => parseInt(c.value));
+  const roomNames  = [...document.querySelectorAll('.print-room-cb:checked')].map(c => c.value);
+  if (teacherIds.length === 0 && roomNames.length === 0) {
+    alert('กรุณาเลือกอย่างน้อย 1 รายการ'); return;
+  }
+  closeModal();
+  let html = '';
+  teacherIds.forEach((tid, i) => {
+    if (i > 0) html += `<div style="page-break-before:always"></div>`;
+    html += buildTeacherPrintable(tid);
+  });
+  roomNames.forEach((room, i) => {
+    if (teacherIds.length > 0 || i > 0) html += `<div style="page-break-before:always"></div>`;
+    html += buildRoomPrintable(room);
+  });
+  const title = [
+    teacherIds.length ? `ครู ${teacherIds.length} คน` : '',
+    roomNames.length  ? `ห้อง ${roomNames.length} ห้อง` : ''
+  ].filter(Boolean).join(' + ');
+  openPrintWindow(html, `ตารางสอน_${title}`);
+}
+
+// ===================== MODAL =====================
+function openModal(title, body, buttons) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('modal-footer').innerHTML = buttons.map(b=>
+    `<button class="btn ${b.cls}" onclick="${b.fn}">${b.label}</button>`
+  ).join('');
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').style.display = 'none';
+}
+
+
+// ===================== DRAG & DROP =====================
+let dragSrc = null; // {tid, day, pid, slot}
+let ghostEl = null;
+
+function dragStart(event, tid, day, pid) {
+  const slot = (DB.slots[tid]||{})[day]?.[pid];
+  if (!slot) return;
+  dragSrc = {tid, day, pid, slot: {...slot}};
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', JSON.stringify(dragSrc));
+  // Ghost label
+  ghostEl = document.createElement('div');
+  ghostEl.className = 'drag-ghost';
+  ghostEl.textContent = slot.subject + (slot.room ? ' · ' + slot.room : '');
+  document.body.appendChild(ghostEl);
+  event.dataTransfer.setDragImage(ghostEl, 60, 20);
+  setTimeout(() => event.target.classList.add('dragging'), 0);
+}
+
+function dragEnd(event) {
+  event.target.classList.remove('dragging');
+  if (ghostEl) { ghostEl.remove(); ghostEl = null; }
+  document.querySelectorAll('.drop-target, .drop-target-swap').forEach(el => {
+    el.classList.remove('drop-target', 'drop-target-swap');
+  });
+}
+
+function dragOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  const td = event.currentTarget;
+  td.classList.remove('drop-target', 'drop-target-swap');
+  // Check if target has a slot (swap) or empty (move)
+  const tTid = parseInt(td.dataset.tid || td.closest('td')?.dataset?.tid);
+  const tDay = td.dataset.day || td.closest('td')?.dataset?.day;
+  const tPid = td.dataset.pid !== undefined ? parseInt(td.dataset.pid) : null;
+  if (!dragSrc || !tDay || tPid === null) return;
+  const targetSlot = tPid !== null ? (DB.slots[tTid]||{})[tDay]?.[tPid] : null;
+  td.classList.add(targetSlot ? 'drop-target-swap' : 'drop-target');
+}
+
+function dragLeave(event) {
+  event.currentTarget.classList.remove('drop-target', 'drop-target-swap');
+}
+
+function dropSlot(event, toTid, toDay, toPid) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drop-target', 'drop-target-swap');
+  if (!dragSrc) return;
+  const {tid: fromTid, day: fromDay, pid: fromPid, slot: fromSlot} = dragSrc;
+  // Same cell = no-op
+  if (fromTid === toTid && fromDay === toDay && fromPid === toPid) { dragSrc = null; return; }
+  const toSlot = (DB.slots[toTid]||{})[toDay]?.[toPid];
+  // Init structures
+  if (!DB.slots[toTid]) DB.slots[toTid] = {};
+  if (!DB.slots[toTid][toDay]) DB.slots[toTid][toDay] = {};
+  if (!DB.slots[fromTid]) DB.slots[fromTid] = {};
+  if (!DB.slots[fromTid][fromDay]) DB.slots[fromTid][fromDay] = {};
+  if (toSlot) {
+    // SWAP
+    DB.slots[toTid][toDay][toPid] = fromSlot;
+    DB.slots[fromTid][fromDay][fromPid] = toSlot;
+    showToast(`สลับ "${fromSlot.subject}" ↔ "${toSlot.subject}" สำเร็จ`);
+  } else {
+    // MOVE
+    DB.slots[toTid][toDay][toPid] = fromSlot;
+    delete DB.slots[fromTid][fromDay][fromPid];
+    showToast(`ย้าย "${fromSlot.subject}" ไป ${toDay} คาบ ${toPid} สำเร็จ`);
+  }
+  dragSrc = null;
+  saveData();
+  renderTimetable();
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a3a5c;color:white;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:opacity 0.3s';
+  t.textContent = '✅ ' + msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2000);
+}
+
+
+
+// ===================== AUTO-SCHEDULE ENGINE =====================
+let activityPeriods = {};
+let activityNames = {};
+let assignments = [];
+
+function initAutoSchedule() {
+  ensureSampleAssignments();
+  activityPeriods = DB.activityPeriods || {};
+  activityNames = DB.activityNames || {};
+  assignments = DB.assignments || [];
+  renderActivityGrid();
+  renderAssignmentList();
+  populateDeleteTeacherSelect();
+}
+
+function renderActivityGrid() {
+  const rp = PERIODS.filter(p => !p.isLunch);
+  let html = `<table style="border-collapse:collapse;font-size:12px;width:100%">
+    <thead><tr><th style="padding:5px 6px;background:var(--bg);border:1px solid var(--border);font-size:11px">วัน</th>`;
+  rp.forEach(p => {
+    html += `<th style="padding:4px 3px;background:var(--bg);border:1px solid var(--border);text-align:center;font-size:10px;min-width:46px">
+      คาบ${p.id}<br><span style="opacity:.6;font-size:9px">${p.label.split('-')[0]}</span></th>`;
+  });
+  html += `</tr></thead><tbody>`;
+  DAYS.forEach(day => {
+    html += `<tr><td style="padding:5px 8px;border:1px solid var(--border);font-weight:600;background:var(--primary);color:white;white-space:nowrap;font-size:12px">${day}</td>`;
+    rp.forEach(p => {
+      const on = (activityPeriods[day]||[]).includes(p.id);
+      const key = `${day}|${p.id}`;
+      const name = activityNames[key] || '';
+      html += `<td style="border:1px solid var(--border);text-align:center;padding:6px;cursor:pointer;background:${on?'#fef3c7':'white'};transition:background .15s"
+        onclick="toggleAct('${day}',${p.id})">
+        <div style="min-height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:6px;background:${on?'#fff7cc':'#f8fafc'};padding:4px">
+          <div style="font-size:13px">${on? (name||'กิจกรรม') : ''}</div>
+          <div style="font-size:11px;color:var(--text-muted);opacity:0.9">${on? 'คลิกเพื่อแก้ไข/ลบ' : 'คลิกเพื่อกำหนด'}</div>
+        </div></td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table><div style="margin-top:6px;font-size:11px;color:var(--text-muted)">🎯 = คาบกิจกรรม (จะไม่จัดวิชาลงไป)</div>`;
+  document.getElementById('activity-grid').innerHTML = html;
+}
+
+function editActivity(day, pid){
+  const key = `${day}|${pid}`;
+  const current = activityNames[key] || '';
+  const name = prompt('แก้ชื่อกิจกรรม วัน'+day+' คาบ '+pid, current);
+  if (name === null) return;
+  if (name.trim()) activityNames[key] = name.trim(); else delete activityNames[key];
+  DB.activityNames = activityNames; saveData(); renderActivityGrid(); renderTimetable(); renderRoomView();
+}
+
+function toggleAct(day, pid) {
+  if (!activityPeriods[day]) activityPeriods[day] = [];
+  const i = activityPeriods[day].indexOf(pid);
+  const key = `${day}|${pid}`;
+  if (i===-1) {
+    // add: ask for activity name
+    let name = prompt('ตั้งชื่อกิจกรรมสำหรับวัน'+day+' คาบ '+pid+' (เว้นว่างเพื่อใช้ "กิจกรรม"):','');
+    if (name === null) return; // cancelled
+    if (!activityPeriods[day].includes(pid)) activityPeriods[day].push(pid);
+    if (name && name.trim()) activityNames[key] = name.trim(); else delete activityNames[key];
+  } else {
+    // remove
+    if (!confirm('ลบกิจกรรมรวม วัน'+day+' คาบ '+pid+' ?')) return;
+    activityPeriods[day].splice(i,1);
+    delete activityNames[key];
+  }
+  DB.activityPeriods = activityPeriods; DB.activityNames = activityNames; saveData(); renderActivityGrid(); renderTimetable(); renderRoomView();
+}
+
+function renderAssignmentList(filterRoom) {
+  const el = document.getElementById('assignment-list');
+  const roomsOptions = `<option value="">-- ทั้งหมด --</option>` + DB.rooms.map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
+  // render header with room filter and summary
+  let headerHtml = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px">
+    <div style="font-weight:600">ภาระการสอน</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label style="font-size:12px;color:var(--text-muted)">กรองห้อง</label>
+      <select id="assignment-room-filter" onchange="renderAssignmentList(this.value)">${roomsOptions}</select>
+      <button class="btn btn-primary btn-sm" onclick="addAssignment()">+ เพิ่ม</button>
+    </div>
+  </div>`;
+
+  const list = (assignments||[]).filter(a => !filterRoom || filterRoom === '' ? true : a.room === filterRoom);
+  if (!list.length) {
+    el.innerHTML = headerHtml + `<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:13px">ยังไม่มีภาระสอนสำหรับที่กรองนี้</div>`;
+    return;
+  }
+
+  // Summary: total items, teachers, and total periods
+  const totalItems = list.length;
+  const teacherCount = new Set(list.map(a=>a.tid)).size;
+  const totalPeriods = list.reduce((s,a)=>s + (a.periodsPerWeek||0), 0);
+  const summaryHtml = `<div style="margin-bottom:8px;color:var(--text-muted);font-size:13px">รวม ${totalItems} รายการ • ${teacherCount} ครู • ${totalPeriods} คาบ/สัปดาห์</div>`;
+
+  // Build table with slightly improved styling
+  el.innerHTML = headerHtml + summaryHtml + `<table style="width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+    <thead><tr>
+      <th style="padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border);text-align:left;min-width:140px">ครู</th>
+      <th style="padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border)">วิชา</th>
+      <th style="padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border)">ห้อง</th>
+      <th style="padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border);text-align:center">คาบ/สัปดาห์</th>
+      <th style="padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border)"></th>
+    </tr></thead><tbody>` +
+    list.map((a,i) => {
+      const t = DB.teachers.find(x=>x.id===a.tid);
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 12px;font-weight:600">${t?t.nickname:'?'}<div style="font-size:12px;color:var(--text-muted);font-weight:400">ID:${a.tid}</div></td>
+        <td style="padding:8px 12px">${a.subject}</td>
+        <td style="padding:8px 12px">${a.room}</td>
+        <td style="padding:8px 12px;text-align:center"><span class="badge badge-blue">${a.periodsPerWeek}</span></td>
+        <td style="padding:6px 8px;text-align:center"><button class="btn btn-danger btn-sm" onclick="removeAssignment(${i})">×</button></td>
+      </tr>`;
+    }).join('') + `</tbody></table>`;
+}
+
+function addAssignment() {
+  const tOpts = DB.teachers.map(t=>`<option value="${t.id}">${t.nickname}</option>`).join('');
+  const sOpts = DB.subjects.map(s=>`<option value="${s.code}">${s.code} – ${s.name}</option>`).join('') +
+    `<option value="__custom__">พิมพ์เอง...</option>`;
+  const rOpts = DB.rooms.map(r=>`<option value="${r.name}">${r.name}</option>`).join('');
+  openModal('เพิ่มภาระสอน',`
+    <div class="form-row cols-2">
+      <div class="form-group"><label>ครู *</label><select id="a-tid">${tOpts}</select></div>
+      <div class="form-group"><label>คาบต่อสัปดาห์ *</label>
+        <select id="a-ppw">${[1,2,3,4,5].map(n=>`<option value="${n}">${n} คาบ</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>วิชา *</label>
+        <select id="a-subj" onchange="toggleCustomSubj(this.value)">${sOpts}</select>
+      </div>
+    </div>
+    <div class="form-row" id="custom-subj-row" style="display:none">
+      <div class="form-group"><label>ชื่อวิชา</label><input id="f-subj-custom" placeholder="เช่น สอนเสริม"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>ห้องเรียน *</label>
+        <select id="a-room"><option value="">-- เลือก --</option>${rOpts}</select>
+      </div>
+    </div>
+  `,[
+    {label:'ยกเลิก',cls:'btn-outline',fn:'closeModal()'},
+    {label:'เพิ่ม',cls:'btn-primary',fn:'saveAssignment()'},
+  ]);
+}
+
+function saveAssignment() {
+  const tid = parseInt(document.getElementById('a-tid').value);
+  let subj = document.getElementById('a-subj').value;
+  if (subj==='__custom__') subj = document.getElementById('f-subj-custom')?.value.trim();
+  const room = document.getElementById('a-room').value;
+  const ppw = parseInt(document.getElementById('a-ppw').value);
+  if (!tid||!subj||!room) { alert('กรุณากรอกให้ครบ'); return; }
+  assignments.push({tid, subject:subj, room, periodsPerWeek:ppw});
+  DB.assignments = assignments; saveData(); closeModal(); renderAssignmentList();
+}
+
+function removeAssignment(i) {
+  assignments.splice(i,1); DB.assignments = assignments; saveData(); renderAssignmentList();
+}
+
+function resetAutoSchedule() {
+  const sel = document.getElementById('delete-teacher-select');
+  const val = sel ? sel.value : '';
+  if (val === '') {
+    if (!confirm('ล้างเฉพาะคาบที่จัดโดยระบบอัตโนมัติทั้งหมด?')) return;
+  }
+  let clearedCount = 0;
+  if (val === 'all' || val === '') {
+    DB.teachers.forEach(t => {
+      const ts = DB.slots[t.id]||{};
+      DAYS.forEach(day => { const ds=ts[day]||{}; Object.keys(ds).forEach(pid=>{if(ds[pid]?.auto){ delete ds[pid]; clearedCount++;}}); });
+    });
+    document.getElementById('autoschedule-log').innerHTML = `<div class="alert alert-info">ล้างคาบอัตโนมัติทั้งหมดเรียบร้อย (${clearedCount} คาบ)</div>`;
+    showToast(`ล้างคาบอัตโนมัติทั้งหมด ${clearedCount} คาบ`);
+  } else {
+    const tid = parseInt(val);
+    if (isNaN(tid)) { alert('กรุณาเลือกครูหรือครูทั้งหมด'); return; }
+    const ts = DB.slots[tid]||{};
+    DAYS.forEach(day => { const ds=ts[day]||{}; Object.keys(ds).forEach(pid=>{ if(ds[pid]?.auto){ delete ds[pid]; clearedCount++; } }); });
+    const t = DB.teachers.find(x=>x.id===tid);
+    document.getElementById('autoschedule-log').innerHTML = `<div class="alert alert-info">ล้างคาบอัตโนมัติของ ${t? t.nickname : 'ครู'} เรียบร้อย (${clearedCount} คาบ)</div>`;
+    showToast(`ล้างคาบอัตโนมัติของ ${t? t.nickname : 'ครู'} ${clearedCount} คาบ`);
+  }
+  saveData();
+}
+
+function roomHasSubjectOnDay(room, day, subject){
+  if(!room) return false;
+  for(const [tid, days] of Object.entries(DB.slots||{})){
+    const ds = (days||{})[day] || {};
+    for(const pidStr of Object.keys(ds||{})){
+      const s = ds[pidStr];
+      if(s && s.room === room && s.subject === subject) return true;
+    }
+  }
+  return false;
+}
+
+function runAutoSchedule() {
+  if (!assignments.length) { alert('กรุณาเพิ่มภาระสอนก่อน'); return { allOk:false, totalPlaced:0, rounds:0, relaxedPlaced:0 }; }
+  const rp = PERIODS.filter(p=>!p.isLunch).map(p=>p.id);
+  const isAct = (day,pid) => (activityPeriods[day]||[]).includes(pid);
+  const tFree = (tid,day,pid) => !(DB.slots[tid]||{})[day]?.[pid];
+  const rFree = (room,day,pid) => !DB.teachers.some(t=>{
+    const s=(DB.slots[t.id]||{})[day]?.[pid]; return s&&s.room===room;
+  });
+
+  // All available slots (not activity)
+  let avail = [];
+  DAYS.forEach(day=>rp.forEach(pid=>{ if(!isAct(day,pid)) avail.push({day,pid}); }));
+
+  function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}}
+
+  // Compute remaining for each assignment based on already placed matching subject+room for that teacher
+  const work = assignments.map(a=>{
+    const placedAlready = Object.values((DB.slots[a.tid]||{})).reduce((acc,dayObj)=>{
+      return acc + Object.entries(dayObj).filter(([pid,slot])=>slot && slot.subject===a.subject && slot.room===a.room).length;
+    },0);
+    return { ...a, remaining: Math.max(0, a.periodsPerWeek - placedAlready) };
+  });
+
+  const maxRounds = 20;
+  let rounds = 0;
+  let totalPlaced = 0;
+  let anyPlacedInRound = true;
+
+  // First: try with "no same subject in same room on same day" rule
+  while(rounds < maxRounds && work.some(w=>w.remaining>0) && anyPlacedInRound) {
+    rounds++; anyPlacedInRound = false;
+    shuffle(avail);
+    // Try to place for each assignment in this round
+    for(const a of work) {
+      if (a.remaining <= 0) continue;
+      const usedDays = new Set();
+      for(const {day,pid} of avail) {
+        if (a.remaining <= 0) break;
+        if (usedDays.has(day) && usedDays.size < 5 && a.remaining < a.periodsPerWeek) continue; // avoid same-day overload
+        if (isAct(day,pid)) continue; // safety
+        if (!tFree(a.tid,day,pid) || !rFree(a.room,day,pid)) continue;
+        // Enforce room-day uniqueness for subject (recommended rule)
+        if (roomHasSubjectOnDay(a.room, day, a.subject)) continue;
+        if (!DB.slots[a.tid]) DB.slots[a.tid] = {};
+        if (!DB.slots[a.tid][day]) DB.slots[a.tid][day] = {};
+        DB.slots[a.tid][day][pid] = { subject: a.subject, room: a.room, auto: true };
+        a.remaining--; totalPlaced++; anyPlacedInRound = true; usedDays.add(day);
+      }
+    }
+  }
+
+  // If still remaining, do a relaxed pass (allow same subject on same day for room) as last resort
+  let relaxedPlaced = 0;
+  if (work.some(w=>w.remaining>0)) {
+    shuffle(avail);
+    for(const a of work) {
+      if (a.remaining <= 0) continue;
+      for(const {day,pid} of avail) {
+        if (a.remaining <= 0) break;
+        if (isAct(day,pid)) continue;
+        if (!tFree(a.tid,day,pid) || !rFree(a.room,day,pid)) continue;
+        if (!DB.slots[a.tid]) DB.slots[a.tid] = {};
+        if (!DB.slots[a.tid][day]) DB.slots[a.tid][day] = {};
+        DB.slots[a.tid][day][pid] = { subject: a.subject, room: a.room, auto: true };
+        a.remaining--; totalPlaced++; relaxedPlaced++;
+      }
+    }
+  }
+
+  // If still remaining, attempt intelligent swaps (may move existing non-auto slots) to free required room/time
+  let swappedPlaced = 0;
+  if (work.some(w=>w.remaining>0)) {
+    const maxSwaps = 200; // safety limit
+    let swaps = 0;
+
+    // helper: find occupant (teacher id and slot) in a given room at day+pid
+    function findOccupantInRoom(room, day, pid) {
+      for (const t of DB.teachers) {
+        const s = (DB.slots[t.id]||{})[day]?.[pid];
+        if (s && s.room === room) return { tid: t.id, slot: s };
+      }
+      return null;
+    }
+
+    // For each remaining assignment, try to find an occupied target (day,pid) and move the occupant elsewhere
+    const daysAll = DAYS.map(d=>d);
+    const rps = PERIODS.filter(p=>!p.isLunch).map(p=>p.id);
+
+    // produce list of candidate target times (including occupied ones)
+    const allTimes = [];
+    daysAll.forEach(day=> rps.forEach(pid=> allTimes.push({day,pid})));
+
+    shuffle(allTimes);
+    while (work.some(w=>w.remaining>0) && swaps < maxSwaps) {
+      let madeProgress = false;
+      for (const a of work) {
+        if (a.remaining <= 0) continue;
+        // try each occupied time in shuffled order
+        for (const {day,pid} of allTimes) {
+          if (isAct(day,pid)) continue;
+          // check if this time is occupied in that room
+          const occ = findOccupantInRoom(a.room, day, pid);
+          if (!occ) continue; // empty or different room occupant
+          const occTid = occ.tid;
+          // ensure we are allowed to place a at this time (teacher a.tid free)
+          if (!tFree(a.tid, day, pid)) continue;
+
+          // find alternative free time for occTid where its slot (occ.slot) can move to
+          let altFound = null;
+          shuffle(allTimes);
+          for (const cand of allTimes) {
+            if (cand.day === day && cand.pid === pid) continue;
+            if (isAct(cand.day,cand.pid)) continue;
+            if (!tFree(occTid, cand.day, cand.pid)) continue; // teacher busy
+            // ensure moving occ.slot.room into cand is allowed (room free at cand)
+            if (!rFree(occ.slot.room, cand.day, cand.pid)) continue;
+            // also avoid creating a same-subject-on-same-day conflict for the moved slot's room
+            // (optional — skip for now)
+            altFound = cand; break;
+          }
+
+          if (altFound) {
+            // perform move: move occ.slot to altFound, then place a into day/pid
+            if (!DB.slots[occTid]) DB.slots[occTid] = {};
+            if (!DB.slots[occTid][altFound.day]) DB.slots[occTid][altFound.day] = {};
+            DB.slots[occTid][altFound.day][altFound.pid] = Object.assign({}, occ.slot, { auto: occ.slot.auto || false });
+            // remove original occ
+            delete DB.slots[occTid][day][pid];
+
+            // place assignment a
+            if (!DB.slots[a.tid]) DB.slots[a.tid] = {};
+            if (!DB.slots[a.tid][day]) DB.slots[a.tid][day] = {};
+            DB.slots[a.tid][day][pid] = { subject: a.subject, room: a.room, auto: true };
+            a.remaining--; totalPlaced++; swappedPlaced++; swaps++; madeProgress = true;
+            break; // move to next assignment
+          }
+          if (swaps >= maxSwaps) break;
+        }
+        if (swaps >= maxSwaps) break;
+      }
+      if (!madeProgress) break; // no more possible swaps
+    }
+  }
+
+  // Build log
+  const log = work.map(a=>{
+    const t = DB.teachers.find(x=>x.id===a.tid);
+    const got = a.periodsPerWeek - a.remaining;
+    return { ok: a.remaining===0, msg: `${a.remaining===0?'✅':'⚠️'} ${t?.nickname} สอน ${a.subject} ห้อง ${a.room}: จัด ${got}/${a.periodsPerWeek} คาบ` };
+  });
+
+  // Detect any slots that exist inside defined activity periods (possible bad data)
+  const misplaced = [];
+  DB.teachers.forEach(t => {
+    const slots = DB.slots[t.id] || {};
+    for(const day of DAYS) {
+      const daySlots = slots[day] || {};
+      Object.keys(daySlots).forEach(pidStr => {
+        const pid = Number(pidStr);
+        if (isAct(day,pid)) {
+          misplaced.push({ teacher: t, day, pid, slot: daySlots[pid] });
+        }
+      });
+    }
+  });
+
+  saveData();
+
+  const allOk = log.every(l=>l.ok) && misplaced.length===0;
+  let html = `<div class="alert alert-${allOk?'success':'danger'}" style="margin-bottom:10px">`;
+  if (allOk) html += `✅ จัดตารางเสร็จ ${totalPlaced} คาบใน ${rounds} รอบ!`;
+  else html += `⚠️ จัดได้ ${totalPlaced} คาบ ใน ${rounds} รอบ — บางรายการไม่ครบ (คาบว่างไม่พอ หรือชนกัน)`;
+  html += `</div>`;
+  html += log.map(l=>`<div style="padding:5px 10px;border-radius:5px;margin-bottom:4px;font-size:13px;background:${l.ok?'#f0fdf4':'#fff7ed'};border-left:3px solid ${l.ok?'#16a34a':'#f59e0b'}">${l.msg}</div>`).join('');
+
+  if (misplaced.length) {
+    html += `<div style="margin-top:8px;padding:8px;border-radius:6px;background:#fff7ed;border-left:4px solid #f59e0b">⚠️ พบคาบที่อยู่ในช่วงคาบกิจกรรม (${misplaced.length} รายการ)</div>`;
+    html += `<div style="font-size:12px;margin-top:6px;color:var(--text-muted)">รายการตัวอย่าง: ` +
+      misplaced.slice(0,6).map(m=>`${m.teacher.nickname} – ${m.day} คาบ${m.pid} (${m.slot.subject})`).join('<br>') + `</div>`;
+  }
+
+  if (relaxedPlaced>0) html += `<div style="margin-top:8px;padding:8px;border-radius:6px;background:#f0f9ff;border-left:4px solid #60a5fa">ℹ️ มีการเติมแบบยอมรับการซ้ำภายในวันสำหรับห้อง (กรณีสุดท้าย) จำนวน ${relaxedPlaced} คาบ</div>`;
+  if (swappedPlaced>0) html += `<div style="margin-top:8px;padding:8px;border-radius:6px;background:#fefce8;border-left:4px solid #f59e0b">🔁 มีการสลับ/ย้ายคาบเพื่อเพิ่มโอกาสสำเร็จ จำนวน ${swappedPlaced} คาบ</div>`;
+
+  html += `<div style="margin-top:10px;font-size:11px;color:var(--text-muted)">💡 บันทึก: ระบบจะไม่จัดคาบลงในคาบกิจกรรมที่กำหนดไว้ · กด "ล้างคาบอัตโนมัติ" ก่อนรันใหม่หากต้องการเริ่มจากศูนย์</div>`;
+
+  document.getElementById('autoschedule-log').innerHTML = html;
+  showToast(`จัดตาราง: ${totalPlaced} คาบ (${rounds} รอบ)`);
+  return { allOk, totalPlaced, rounds, relaxedPlaced, swappedPlaced, work };
+}
+
+function clearAutoSlotsSilently(){
+  DB.teachers.forEach(t => {
+    const ts = DB.slots[t.id]||{};
+    DAYS.forEach(day => { const ds = ts[day] || {}; Object.keys(ds).forEach(pid=>{ if(ds[pid]?.auto) delete ds[pid]; }); });
+  });
+}
+
+async function runAutoScheduleUntilComplete(){
+  if (!assignments.length) { alert('กรุณาเพิ่มภาระสอนก่อน'); return; }
+  const maxAttempts = 12; // number of full retries
+  let attempt = 0;
+  let finalRes = null;
+  // disable control buttons to avoid re-entry
+  const btns = document.querySelectorAll('#autoschedule-controls button');
+  btns.forEach(b=>b.disabled = true);
+  showToast('เริ่มจัดตาราง: พยายามจนสำเร็จ...');
+  while(attempt < maxAttempts){
+    attempt++;
+    // start fresh: clear only previously auto-placed slots
+    clearAutoSlotsSilently();
+    const res = runAutoSchedule();
+    finalRes = res;
+    // small delay to allow UI to update
+    await new Promise(r => setTimeout(r, 120));
+    if (res && res.allOk){
+      showToast(`เรียบร้อยใน ${attempt} รอบของการพยายาม`);
+      break;
+    }
+  }
+  // re-enable buttons
+  btns.forEach(b=>b.disabled = false);
+  if (!finalRes || !finalRes.allOk) alert(`ไม่สามารถจัดให้ครบได้หลัง ${attempt} รอบ กรุณาตรวจสอบข้อจำกัด`);
+  else alert(`จัดตารางสำเร็จหลัง ${attempt} รอบ`);
+  return finalRes;
+}
+
+// ===================== INIT =====================
+// Pre-load sample autoschedule data if not yet set
+function ensureSampleAssignments() {
+  if (DB.assignments && DB.assignments.length > 0) return; // already set
+  // Activity periods: จันทร์ คาบ7=กพด., คาบ8=PLC | อังคาร คาบ7=ชุมนุม | พุธ คาบ7=ลูกเสือ | พฤหัสบดี คาบ7=จริยธรรม | ศุกร์ คาบ7=แนะแนว
+  DB.activityPeriods = {
+    'จันทร์':    [7, 8],
+    'อังคาร':   [7],
+    'พุธ':       [7],
+    'พฤหัสบดี': [7],
+    'ศุกร์':     [7],
+  };
+  // Sample assignments (full list provided by user)
+  DB.assignments = [
+    {tid:1, subject:'คณิต', room:'ป.1/1', periodsPerWeek:5},
+    {tid:1, subject:'อ.หลัก', room:'ป.1/1', periodsPerWeek:3},
+    {tid:1, subject:'ไทยหลัก', room:'ป.1/1', periodsPerWeek:5},
+    {tid:1, subject:'ไทยเพิ่ม', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.1/1', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:4, subject:'ศิลปะ', room:'ป.1/1', periodsPerWeek:1},
+    {tid:4, subject:'สังคม', room:'ป.1/1', periodsPerWeek:2},
+
+    {tid:5, subject:'การงาน', room:'ป.1/1', periodsPerWeek:1},
+    {tid:5, subject:'ต้านทุจริต', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:8, subject:'วิทย์', room:'ป.1/1', periodsPerWeek:2},
+    {tid:11, subject:'ประวัติ', room:'ป.1/1', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.1/2', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.1/2', periodsPerWeek:1},
+    {tid:4, subject:'ศิลปะ', room:'ป.1/2', periodsPerWeek:1},
+    {tid:4, subject:'สังคม', room:'ป.1/2', periodsPerWeek:2},
+    {tid:5, subject:'การงาน', room:'ป.1/2', periodsPerWeek:1},
+    {tid:5, subject:'ต้านทุจริต', room:'ป.1/2', periodsPerWeek:1},
+    {tid:8, subject:'วิทย์', room:'ป.1/2', periodsPerWeek:2},
+
+    {tid:9, subject:'คณิต', room:'ป.1/2', periodsPerWeek:5},
+    {tid:9, subject:'ไทยหลัก', room:'ป.1/2', periodsPerWeek:5},
+    {tid:11, subject:'ท.เพิ่ม', room:'ป.1/2', periodsPerWeek:1},
+    {tid:11, subject:'ประวัติ', room:'ป.1/2', periodsPerWeek:1},
+    {tid:11, subject:'อ.หลัก', room:'ป.1/2', periodsPerWeek:3},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.2', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.2', periodsPerWeek:1},
+    {tid:4, subject:'ศิลปะ', room:'ป.2', periodsPerWeek:1},
+    {tid:5, subject:'การงาน', room:'ป.2', periodsPerWeek:1},
+    {tid:6, subject:'ท.หลัก', room:'ป.2', periodsPerWeek:5},
+    {tid:6, subject:'ท.เพิ่ม', room:'ป.2', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.2', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.2', periodsPerWeek:2},
+    {tid:10, subject:'ต้านทุจริต', room:'ป.2', periodsPerWeek:1},
+    {tid:11, subject:'คณิต', room:'ป.2', periodsPerWeek:5},
+    {tid:11, subject:'ประวัติ', room:'ป.2', periodsPerWeek:1},
+    {tid:12, subject:'อ.หลัก', room:'ป.2', periodsPerWeek:3},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.3', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.3', periodsPerWeek:1},
+    {tid:3, subject:'ไทยเพิ่ม', room:'ป.3', periodsPerWeek:1},
+    {tid:4, subject:'ศิลปะ', room:'ป.3', periodsPerWeek:1},
+    {tid:5, subject:'การงาน', room:'ป.3', periodsPerWeek:1},
+    {tid:6, subject:'คณิต', room:'ป.3', periodsPerWeek:5},
+    {tid:7, subject:'ประวัติ', room:'ป.3', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.3', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.3', periodsPerWeek:2},
+    {tid:9, subject:'ไทยหลัก', room:'ป.3', periodsPerWeek:5},
+    {tid:10, subject:'ต้านทุจริต', room:'ป.3', periodsPerWeek:1},
+    {tid:12, subject:'อ.หลัก', room:'ป.3', periodsPerWeek:3},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.4', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.4', periodsPerWeek:1},
+    {tid:3, subject:'ท.หลัก', room:'ป.4', periodsPerWeek:4},
+    {tid:4, subject:'ศิลปะ', room:'ป.4', periodsPerWeek:2},
+    {tid:5, subject:'การงาน', room:'ป.4', periodsPerWeek:2},
+    {tid:6, subject:'ว.คำนวณ', room:'ป.4', periodsPerWeek:1},
+    {tid:7, subject:'ประวัติ', room:'ป.4', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.4', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.4', periodsPerWeek:3},
+    {tid:10, subject:'คณิต', room:'ป.4', periodsPerWeek:4},
+    {tid:12, subject:'อ.หลัก', room:'ป.4', periodsPerWeek:2},
+    {tid:12, subject:'อ.เพิ่ม', room:'ป.4', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.5', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.5', periodsPerWeek:1},
+    {tid:3, subject:'ท.หลัก', room:'ป.5', periodsPerWeek:4},
+    {tid:4, subject:'ศิลปะ', room:'ป.5', periodsPerWeek:2},
+    {tid:6, subject:'ว.คำนวณ', room:'ป.5', periodsPerWeek:1},
+    {tid:7, subject:'ประวัติ', room:'ป.5', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.5', periodsPerWeek:2},
+    {tid:10, subject:'คณิต', room:'ป.5', periodsPerWeek:4},
+    {tid:11, subject:'วิทย์', room:'ป.5', periodsPerWeek:3},
+    {tid:12, subject:'อ.หลัก', room:'ป.5', periodsPerWeek:2},
+    {tid:12, subject:'อ.เพิ่ม', room:'ป.5', periodsPerWeek:1},
+
+    {tid:2, subject:'พลศึกษา', room:'ป.6', periodsPerWeek:1},
+    {tid:2, subject:'สุขศึกษา', room:'ป.6', periodsPerWeek:1},
+    {tid:3, subject:'ท.หลัก', room:'ป.6', periodsPerWeek:4},
+    {tid:4, subject:'ศิลปะ', room:'ป.6', periodsPerWeek:2},
+    {tid:5, subject:'การงาน', room:'ป.6', periodsPerWeek:2},
+    {tid:6, subject:'ว.คำนวณ', room:'ป.6', periodsPerWeek:1},
+    {tid:7, subject:'ประวัติ', room:'ป.6', periodsPerWeek:1},
+    {tid:7, subject:'สังคม', room:'ป.6', periodsPerWeek:2},
+    {tid:8, subject:'วิทย์', room:'ป.6', periodsPerWeek:3},
+    {tid:10, subject:'คณิต', room:'ป.6', periodsPerWeek:4},
+    {tid:12, subject:'อ.หลัก', room:'ป.6', periodsPerWeek:2},
+    {tid:12, subject:'อ.เพิ่ม', room:'ป.6', periodsPerWeek:1},
+
+    {tid:5, subject:'คอม', room:'อ.2/1', periodsPerWeek:1},
+    {tid:5, subject:'คอม', room:'อ.2/2', periodsPerWeek:1},
+    {tid:5, subject:'คอม', room:'อ.3', periodsPerWeek:1},
+    {tid:5, subject:'การงาน', room:'ป.5', periodsPerWeek:2}
+  ];
+  saveData();
+}
+loadData();
+loadTimeSettings();
+renderDashboard();
+
+// Auto-save on page unload
+window.addEventListener('beforeunload', saveData);
+
+// ===================== PWA =====================
+// Register inline Service Worker via Blob
+(function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  const swCode = `
+const CACHE = 'timetable-v1';
+const OFFLINE_URL = self.location.href;
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.add(OFFLINE_URL)).catch(()=>{})
+  );
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(OFFLINE_URL))
+    );
+  }
+});`;
+  const blob = new Blob([swCode], {type: 'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl, {scope: '/'})
+    .then(() => console.log('SW registered'))
+    .catch(() => {
+      // Blob SW ไม่ได้รับการ support ทุก browser — ไม่ error
+    });
+})();
+
+// Install prompt
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner() {
+  if (document.getElementById('pwa-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'pwa-banner';
+  banner.style.cssText = `
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#1a3a5c;color:white;border-radius:14px;
+    padding:12px 20px;display:flex;align-items:center;gap:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;
+    font-family:inherit;font-size:14px;animation:slideUp .3s ease;
+    max-width:90vw;
+  `;
+  banner.innerHTML = `
+    <span style="font-size:24px">📚</span>
+    <div>
+      <div style="font-weight:700">ติดตั้งแอปบนเครื่อง</div>
+      <div style="font-size:12px;opacity:.8">ใช้งาน offline ได้ ไม่ต้องเปิด browser</div>
+    </div>
+    <button onclick="installPWA()" style="
+      background:#f59e0b;color:#1a1a1a;border:none;border-radius:8px;
+      padding:8px 16px;font-weight:700;cursor:pointer;font-family:inherit;
+      font-size:13px;white-space:nowrap
+    ">ติดตั้ง</button>
+    <button onclick="document.getElementById('pwa-banner').remove()" style="
+      background:rgba(255,255,255,.15);color:white;border:none;border-radius:8px;
+      padding:8px 10px;cursor:pointer;font-size:16px;line-height:1
+    ">✕</button>
+  `;
+  document.body.appendChild(banner);
+  // Auto-hide after 10 sec
+  setTimeout(() => banner.remove(), 10000);
+}
+
+function installPWA() {
+  if (!deferredInstallPrompt) {
+    alert('วิธีติดตั้ง:\n📱 Android Chrome: กดเมนู ⋮ → "เพิ่มไปยังหน้าจอหลัก"\n🍎 iOS Safari: กดปุ่ม แชร์ → "เพิ่มไปยังหน้าจอหลัก"');
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(r => {
+    if (r.outcome === 'accepted') {
+      document.getElementById('pwa-banner')?.remove();
+    }
+    deferredInstallPrompt = null;
+  });
+}
+
+// เพิ่มปุ่มติดตั้งในหน้า sidebar
+(function addInstallBtn() {
+  const nav = document.querySelector('.sidebar-nav');
+  if (!nav) return;
+  const btn = document.createElement('div');
+  btn.style.cssText = 'padding:12px 16px;margin-top:auto;border-top:1px solid rgba(255,255,255,.1)';
+  btn.innerHTML = `<button onclick="installPWA()" style="
+    width:100%;background:rgba(245,158,11,.15);color:#fcd34d;
+    border:1px solid rgba(245,158,11,.3);border-radius:8px;
+    padding:9px;font-family:inherit;font-size:13px;
+    font-weight:600;cursor:pointer;display:flex;
+    align-items:center;justify-content:center;gap:6px
+  ">📲 ติดตั้งเป็นแอป</button>`;
+  nav.parentElement.appendChild(btn);
+})();
+
+// CSS animation
+const style = document.createElement('style');
+style.textContent = `@keyframes slideUp{from{transform:translateX(-50%) translateY(80px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
